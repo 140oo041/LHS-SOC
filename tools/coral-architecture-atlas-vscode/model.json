@@ -667,7 +667,13 @@
             "x": 630,
             "y": 40,
             "width": 430,
-            "height": 600
+            "height": 340
+          },
+          "systolic-array-16x16": {
+            "x": 630,
+            "y": 420,
+            "width": 430,
+            "height": 220
           }
         }
       },
@@ -1501,11 +1507,25 @@
           "protocol": "control",
           "side": "right",
           "offset": 0.62
+        },
+        "array": {
+          "label": "ARRAY CMD",
+          "protocol": "control",
+          "side": "right",
+          "offset": 0.82
         }
       },
       "vector-engine": {
         "command": {
           "label": "VECTOR CMD",
+          "protocol": "control",
+          "side": "left",
+          "offset": 0.5
+        }
+      },
+      "systolic-array-16x16": {
+        "command": {
+          "label": "ARRAY CMD",
           "protocol": "control",
           "side": "left",
           "offset": 0.5
@@ -2817,14 +2837,14 @@
         "id": "compute-cluster",
         "name": "Scalar + Vector Core",
         "kind": "compute",
-        "summary": "Compute enclosure containing the scalar front end and vector execution engine.",
+        "summary": "Compute enclosure containing the scalar front end, vector execution engine, and 16\u00d716 systolic-array accelerator.",
         "parent": "coral-core",
         "owner": "unassigned",
         "maturity": "specified",
         "rank": 1,
         "order": 0,
         "responsibilities": [
-          "Execute scalar instructions and dispatch vector commands.",
+          "Execute scalar instructions and dispatch vector or systolic-array commands.",
           "Present instruction, data, and external request paths to the core fabric."
         ],
         "documents": [
@@ -2839,6 +2859,10 @@
           {
             "title": "Vector engine reference",
             "path": "Vector_engine_ref.png"
+          },
+          {
+            "title": "Systolic array reference",
+            "path": "Systolic_array_ref.png"
           }
         ],
         "issues": [],
@@ -2885,6 +2909,29 @@
           {
             "title": "Vector engine reference",
             "path": "Vector_engine_ref.png"
+          }
+        ],
+        "issues": [],
+        "rtl": []
+      },
+      {
+        "id": "systolic-array-16x16",
+        "name": "16\u00d716 Systolic Array",
+        "kind": "engine",
+        "summary": "Solid black-box accelerator instance for a 16\u00d716 processing-element array inside the compute cluster.",
+        "parent": "compute-cluster",
+        "owner": "unassigned",
+        "maturity": "proposal",
+        "rank": 1,
+        "order": 1,
+        "responsibilities": [
+          "Accept array commands from the scalar front end.",
+          "Execute dense multiply-accumulate work across a 16\u00d716 processing-element mesh."
+        ],
+        "documents": [
+          {
+            "title": "Systolic array reference",
+            "path": "Systolic_array_ref.png"
           }
         ],
         "issues": [],
@@ -4701,6 +4748,16 @@
         "bidirectional": false
       },
       {
+        "id": "cluster-scalar-systolic",
+        "from": "scalar-core",
+        "from_port": "array",
+        "to": "systolic-array-16x16",
+        "to_port": "command",
+        "protocol": "control",
+        "label": "queued systolic-array command",
+        "bidirectional": false
+      },
+      {
         "id": "scalar-fetch-decode",
         "from": "scalar-fetch",
         "from_port": "decode",
@@ -5578,6 +5635,17 @@
       "open": {
         "file": "architecture/soc.yaml",
         "needle": "  - id: vector-engine"
+      },
+      "matches": []
+    },
+    {
+      "id": "systolic-array-16x16",
+      "name": "16\u00d716 Systolic Array",
+      "kind": "engine",
+      "section": "compute",
+      "open": {
+        "file": "architecture/soc.yaml",
+        "needle": "  - id: systolic-array-16x16"
       },
       "matches": []
     },
@@ -6724,7 +6792,7 @@
         },
         {
           "id": "protocol-control",
-          "step": "10",
+          "step": "11",
           "title": "Control",
           "description": "Commands, sequencing, configuration, and status.",
           "section": "interconnect",
@@ -6736,6 +6804,7 @@
             "itcm-arbiter",
             "scalar-core",
             "vector-engine",
+            "systolic-array-16x16",
             "scalar-fetch",
             "scalar-decode",
             "dma-axi-dram",
@@ -6884,7 +6953,7 @@
         },
         {
           "id": "owners-compute",
-          "step": "34",
+          "step": "35",
           "title": "Compute + movement",
           "description": "Coral Core, its datapath, and DMA behavior.",
           "section": "compute",
@@ -6895,6 +6964,7 @@
             "compute-cluster",
             "scalar-core",
             "vector-engine",
+            "systolic-array-16x16",
             "systolic-array",
             "scalar-fetch",
             "scalar-alu",

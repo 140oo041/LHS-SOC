@@ -105,6 +105,7 @@ a { color: inherit; }
 .edge.return { stroke-dasharray: 7 7; stroke-width: 2; }
 .diagram-node { --node-accent: #64748b; --node-title-size: 12px; --node-kind-size: 7px; --node-port-size: 7px; position: absolute; z-index: 2; width: 184px; min-height: 92px; display: grid; grid-template-rows: 1fr; padding: 0; overflow: hidden; border: 2px solid #101c26; border-radius: 5px; background: #101c26; color: white; box-shadow: 0 8px 18px rgba(24,48,63,.16); text-align: center; cursor: pointer; transition: opacity 220ms ease-out, filter 220ms ease-out, border-color 160ms ease-out, box-shadow 160ms ease-out, transform 160ms ease-out; }
 .diagram-node.leaf { background: color-mix(in srgb, var(--ink) 92%, var(--node-accent)); }
+.diagram-node[data-id="systolic-array-16x16"], .internal-node[data-child="systolic-array-16x16"] { background: var(--ink); }
 .diagram-node:hover { transform: translateY(-2px); border-color: var(--ink); box-shadow: 0 13px 28px rgba(24,48,63,.17); }
 .arrange-mode .diagram-node, .arrange-mode .diagram-node button { cursor: move; }
 .arrange-mode .diagram-node:hover, .diagram-node.dragging { transform: none; }

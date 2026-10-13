@@ -125,7 +125,8 @@ layouts:
     canvas: {width: 1090, height: 680}
     nodes:
       scalar-core: {x: 30, y: 40, width: 560, height: 600}
-      vector-engine: {x: 630, y: 40, width: 430, height: 600}
+      vector-engine: {x: 630, y: 40, width: 430, height: 340}
+      systolic-array-16x16: {x: 630, y: 420, width: 430, height: 220}
   scalar-core:
     canvas: {width: 1040, height: 780}
     nodes:
@@ -302,8 +303,11 @@ ports:
   scalar-core:
     fetch: {label: FETCH, protocol: control, side: right, offset: 0.3}
     vector: {label: VECTOR CMD, protocol: control, side: right, offset: 0.62}
+    array: {label: ARRAY CMD, protocol: control, side: right, offset: 0.82}
   vector-engine:
     command: {label: VECTOR CMD, protocol: control, side: left, offset: 0.5}
+  systolic-array-16x16:
+    command: {label: ARRAY CMD, protocol: control, side: left, offset: 0.5}
   scalar-fetch:
     decode: {label: FETCH, protocol: control, side: right, offset: 0.5}
   scalar-decode:
@@ -869,19 +873,20 @@ blocks:
   - id: compute-cluster
     name: Scalar + Vector Core
     kind: compute
-    summary: Compute enclosure containing the scalar front end and vector execution engine.
+    summary: Compute enclosure containing the scalar front end, vector execution engine, and 16×16 systolic-array accelerator.
     parent: coral-core
     owner: unassigned
     maturity: specified
     rank: 1
     order: 0
     responsibilities:
-      - Execute scalar instructions and dispatch vector commands.
+      - Execute scalar instructions and dispatch vector or systolic-array commands.
       - Present instruction, data, and external request paths to the core fabric.
     documents:
       - {title: Core reference diagram, path: core_ref.png}
       - {title: Scalar core reference, path: Scalar_core_ref.png}
       - {title: Vector engine reference, path: Vector_engine_ref.png}
+      - {title: Systolic array reference, path: Systolic_array_ref.png}
     issues: []
     rtl: []
 
@@ -916,6 +921,23 @@ blocks:
       - Execute 8-bit, 16-bit, and 32-bit vector operations.
     documents:
       - {title: Vector engine reference, path: Vector_engine_ref.png}
+    issues: []
+    rtl: []
+
+  - id: systolic-array-16x16
+    name: 16×16 Systolic Array
+    kind: engine
+    summary: Solid black-box accelerator instance for a 16×16 processing-element array inside the compute cluster.
+    parent: compute-cluster
+    owner: unassigned
+    maturity: proposal
+    rank: 1
+    order: 1
+    responsibilities:
+      - Accept array commands from the scalar front end.
+      - Execute dense multiply-accumulate work across a 16×16 processing-element mesh.
+    documents:
+      - {title: Systolic array reference, path: Systolic_array_ref.png}
     issues: []
     rtl: []
 
@@ -1617,6 +1639,7 @@ connections:
   - {id: core-dtcm-memory, from: dtcm-arbiter, from_port: memory, to: dtcm, to_port: dbus, protocol: dbus, label: DTCM bank access, bidirectional: true}
   - {id: core-itcm-memory, from: itcm-arbiter, from_port: memory, to: itcm, to_port: ibus, protocol: ibus, label: ITCM bank access, bidirectional: true}
   - {id: cluster-scalar-vector, from: scalar-core, from_port: vector, to: vector-engine, to_port: command, protocol: control, label: queued vector command, bidirectional: false}
+  - {id: cluster-scalar-systolic, from: scalar-core, from_port: array, to: systolic-array-16x16, to_port: command, protocol: control, label: queued systolic-array command, bidirectional: false}
   - {id: scalar-fetch-decode, from: scalar-fetch, from_port: decode, to: scalar-decode, to_port: fetch, protocol: control, label: fetched instructions, bidirectional: false}
   - {id: systolic-activation-grid, from: systolic-activation-buffer, from_port: output, to: systolic-pe-grid, to_port: activation, protocol: datapath, label: activation rows, bidirectional: false}
   - {id: systolic-grid-output, from: systolic-pe-grid, from_port: output, to: systolic-output-buffers, to_port: input, protocol: datapath, label: accumulated outputs, bidirectional: false}

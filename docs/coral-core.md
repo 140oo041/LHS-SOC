@@ -25,16 +25,17 @@ The drill-down uses the canonical bank organization from the references:
 
 ## Compute hierarchy
 
-**Scalar + Vector Core** is the compute-cluster enclosure. It contains two peers:
+**Scalar + Vector Core** is the compute-cluster enclosure. It contains three peers:
 
 - **Scalar Core**: Fetch · 128-bit ×4, Decode ×4, ALU ×4, Branch Unit ×4, Multiply, Divide, Load/Store Unit · LSU, Control/Status Registers · CSR, and Integer Register File · 32-bit. The register-file drill-down exposes `x0 · x1 · … · x31` and its Scoreboard.
 - **Vector Execution Engine**: Vector Command Queue, Vector ALU ×2, Vector MAC/MUL/DIV, and Vector Register File · 128-bit. Its register-file drill-down exposes `v0 · v1 · … · v31` and its Scoreboard.
+- **16×16 Systolic Array**: a solid black-box accelerator instance commanded by the Scalar Core through `ARRAY CMD`. Its internal implementation is intentionally hidden at this integration level.
 
-The **Systolic Array** is not currently instantiated or wired inside Coral Core. Its reference-derived hierarchy remains in the editable model as deferred standalone work.
+The separate **Systolic Array** reference hierarchy remains a standalone 4×4 evidence model. It documents activation, PE-grid, accumulation, and processing-element concepts without turning the integrated 16×16 instance into an expanded container.
 
 ## Systolic Array and processing element
 
-The deferred array model preserves the reference composition: **Unified Multi-Bank Activation Buffer**, **4×4 PE + Weight Buffer Grid**, **Output Buffers + Accumulators ×4**, and **Processing Element Detail**. Their drill-downs expose four activation banks, 16 row/column cells named `PE R0C0 + WB` through `PE R3C3 + WB`, and four accumulator/output-buffer paths. Activation flows left-to-right across each grid row; partial sums flow top-to-bottom through each column.
+The standalone reference model preserves the composition: **Unified Multi-Bank Activation Buffer**, **4×4 PE + Weight Buffer Grid**, **Output Buffers + Accumulators ×4**, and **Processing Element Detail**. Their drill-downs expose four activation banks, 16 row/column cells named `PE R0C0 + WB` through `PE R3C3 + WB`, and four accumulator/output-buffer paths. Activation flows left-to-right across each grid row; partial sums flow top-to-bottom through each column.
 
 Processing Element Detail exposes Input Activation, Weight, Input Partial Sum, Multiply, Add, Activation Register, Output Activation, Output Register, and Output Partial Sum. The activation feeds Multiply and the forwarding register; Weight feeds Multiply; the product and incoming partial sum feed Add; registered activation exits to the right and the registered accumulated sum exits downward.
 

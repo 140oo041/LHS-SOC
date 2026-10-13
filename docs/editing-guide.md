@@ -11,17 +11,17 @@ The atlas is text-first: edit `architecture/soc.yaml`, run the validator, and re
 5. Declare every visible interface under `ports.<block-id>`. Give it a role label such as `AXI MASTER`, `AXI SLAVE`, `TL-UL HOST`, `TL-UL DEVICE`, `IBUS`, or `DBUS`, plus its edge and fractional offset.
 6. Add connections using `from_port` and `to_port`. The validator requires both ports to exist and to use the connection's protocol.
 
-Port badges render just inside their owning block boundary. Connections between immediate children are also rendered inside the parent composite, so the focused and nested views stay consistent without a second layout definition.
+Port sockets render flush to the inside of their owning block edge. Connections between immediate children are also rendered inside the parent composite, so the focused and nested views stay consistent without a second layout definition.
 
 ## Navigate the hierarchy
 
-Select a composite block, then use the persistent **Down** control or Alt+Down to enter its authored child canvas. Use **Up** or Alt+Up to move to its parent; breadcrumbs jump directly to any ancestor. Down remains unavailable until the selected block has children. The deferred Systolic Array is a standalone root and can be reached through search while it remains outside Coral Core.
+Select a composite block, then use the persistent **Down** control or Alt+Down to enter its authored child canvas. Use **Up** or Alt+Up to move to its parent; breadcrumbs jump directly to any ancestor. Down remains unavailable until the selected block has children. The detailed 4×4 Systolic Array reference is a standalone root reachable through search; the integrated 16×16 instance remains an intentionally solid black box.
 
 ## Fixed placement
 
 Each composite block owns a fixed canvas under `layouts`. Coordinates are authored and reviewed; the viewer never rearranges them automatically. Add every immediate child to the parent's `nodes` map with `x`, `y`, `width`, and `height`; use the same process for the internals of DMA, Coral Core, or any future composite block.
 
-Keep the active containment intact: Scalar Core and Vector Execution Engine belong to Scalar + Vector Core. Systolic Array remains a deferred standalone root until the team chooses to instantiate it again. DTCM has four `128×512` bank children, ITCM has one, and the deferred PE grid uses stable `pe-r<row>-c<column>` IDs for all 16 PE + WB cells.
+Keep the active containment intact: Scalar Core, Vector Execution Engine, and the solid 16×16 Systolic Array instance belong to Scalar + Vector Core. The detailed 4×4 Systolic Array remains a standalone reference hierarchy. DTCM has four `128×512` bank children, ITCM has one, and the reference PE grid uses stable `pe-r<row>-c<column>` IDs for all 16 PE + WB cells.
 
 ### Draft positions in the viewer
 
