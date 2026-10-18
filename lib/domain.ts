@@ -1,5 +1,13 @@
 export const WORKSPACE_SLUG = "coral";
 
+/**
+ * Identity of an unauthenticated visitor under public read access.
+ *
+ * A reserved .invalid address (RFC 2606) so it can never collide with a real
+ * account, and so anything keyed by owner email is obviously not a person.
+ */
+export const PUBLIC_VISITOR_EMAIL = "public@atlas.invalid";
+
 export type Role = "admin" | "editor" | "viewer";
 
 export type Actor = {

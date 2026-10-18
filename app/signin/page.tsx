@@ -2,10 +2,17 @@ import Link from "next/link";
 import Image from "next/image";
 import { redirect } from "next/navigation";
 import { auth, authProviderIds, signIn } from "@/auth";
-import { configurationErrors, demoAuthEnabled } from "@/lib/config";
+import { configurationErrors, demoAuthEnabled, publicReadAccessEnabled, signInAvailable } from "@/lib/config";
+
+// Reads the session and the live configuration; see the note in
+// app/(workspace)/layout.tsx for why that is not enough to avoid prerendering.
+export const dynamic = "force-dynamic";
 
 export default async function SignInPage() {
-  const session = await auth();
+  // With public read access and nothing to sign in with, this page has
+  // nothing to offer; send the visitor to the thing they came for.
+  if (!signInAvailable() && publicReadAccessEnabled()) redirect("/architecture");
+  const session = signInAvailable() ? await auth() : null;
   if (session) redirect("/architecture");
   const demoAvailable = demoAuthEnabled();
   // Reasons stay in the server log; the page only admits that sign-in is

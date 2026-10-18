@@ -16,7 +16,19 @@ const navigation: Array<{ href: string; label: string; icon: IconName }> = [
   { href: "/documents", label: "Documents", icon: "documents" },
 ];
 
-export function AppShell({ actor, children }: { actor: Actor; children: React.ReactNode }) {
+export function AppShell({
+  actor,
+  anonymous,
+  canSignIn,
+  children,
+}: {
+  actor: Actor;
+  /** Public read-only visitor: no account, so no account menu. */
+  anonymous: boolean;
+  /** Whether an identity provider exists to sign in with. */
+  canSignIn: boolean;
+  children: React.ReactNode;
+}) {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
   const current = navigation.find((item) => pathname.startsWith(item.href)) ?? navigation[0];
@@ -45,18 +57,29 @@ export function AppShell({ actor, children }: { actor: Actor; children: React.Re
             <span>Find evidence</span>
             <kbd>/</kbd>
           </Link>
-          <span className={`role-stamp role-${actor.role}`}>{actor.role}</span>
-          <details className="account-menu">
-            <summary aria-label={`Open account menu for ${actor.name}`}>
-              <span className="avatar">{actor.name.split(/\s+/).map((part) => part[0]).slice(0, 2).join("")}</span>
-            </summary>
-            <div className="account-popover">
-              <strong>{actor.name}</strong>
-              <span>{actor.email}</span>
-              <small>{actor.role}</small>
-              <button type="button" onClick={() => void signOut({ redirectTo: "/signin" })}>Sign out</button>
-            </div>
-          </details>
+          <span className={`role-stamp role-${anonymous ? "public" : actor.role}`}>
+            {anonymous ? "read only" : actor.role}
+          </span>
+          {anonymous ? (
+            canSignIn && (
+              <Link className="command-button" href="/signin">
+                <Icon name="settings" />
+                <span>Sign in</span>
+              </Link>
+            )
+          ) : (
+            <details className="account-menu">
+              <summary aria-label={`Open account menu for ${actor.name}`}>
+                <span className="avatar">{actor.name.split(/\s+/).map((part) => part[0]).slice(0, 2).join("")}</span>
+              </summary>
+              <div className="account-popover">
+                <strong>{actor.name}</strong>
+                <span>{actor.email}</span>
+                <small>{actor.role}</small>
+                <button type="button" onClick={() => void signOut({ redirectTo: "/signin" })}>Sign out</button>
+              </div>
+            </details>
+          )}
         </div>
       </header>
 

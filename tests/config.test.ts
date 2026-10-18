@@ -7,7 +7,9 @@ import {
   isLocalDevelopment,
   maxUploadBytes,
   publicErrorMessage,
+  publicReadAccessEnabled,
   secretMatches,
+  signInAvailable,
 } from "@/lib/config";
 
 const GUARDED = [
@@ -24,6 +26,7 @@ const GUARDED = [
   "ATLAS_MAX_UPLOAD_BYTES",
   "S3_BUCKET",
   "S3_REGION",
+  "ATLAS_PUBLIC_ACCESS",
 ] as const;
 
 // NODE_ENV is declared read-only on ProcessEnv, and these tests exist
@@ -49,6 +52,20 @@ function setEnv(values: Partial<Record<(typeof GUARDED)[number], string | undefi
     else env[key] = value;
   }
 }
+
+/** A deployment posture with nothing auth-related configured. */
+const NO_AUTH_AT_ALL = {
+  NODE_ENV: undefined,
+  ATLAS_DEMO_AUTH: undefined,
+  AUTH_SECRET: undefined,
+  AUTH_GOOGLE_ID: undefined,
+  AUTH_GOOGLE_SECRET: undefined,
+  ATLAS_ALLOWED_EMAIL_DOMAINS: undefined,
+  ATLAS_ALLOWED_EMAILS: undefined,
+  ATLAS_ADMIN_EMAILS: undefined,
+  ATLAS_EDITOR_EMAILS: undefined,
+  ATLAS_PUBLIC_ACCESS: undefined,
+} as const;
 
 /**
  * These assertions exist because the original code expressed every
@@ -130,6 +147,7 @@ describe("machine secret comparison", () => {
 
 describe("configuration report", () => {
   const NOTHING_SET = {
+    ...NO_AUTH_AT_ALL,
     NODE_ENV: undefined,
     AUTH_SECRET: undefined,
     AUTH_GOOGLE_ID: undefined,
@@ -148,12 +166,19 @@ describe("configuration report", () => {
     AUTH_GOOGLE_SECRET: "client-secret",
   } as const;
 
-  it("names every missing prerequisite for a deployment", () => {
+  it("says nobody can reach a deployment with neither sign-in nor public access", () => {
     setEnv(NOTHING_SET);
     const errors = configurationErrors();
-    expect(errors).toHaveLength(3);
+    expect(errors).toHaveLength(1);
+    expect(errors[0]).toContain("Nobody can reach Atlas");
+    expect(errors[0]).toContain("ATLAS_PUBLIC_ACCESS");
+  });
+
+  it("requires a secret and an allowlist once a provider exists", () => {
+    setEnv({ ...NOTHING_SET, AUTH_GOOGLE_ID: "client-id", AUTH_GOOGLE_SECRET: "client-secret" });
+    const errors = configurationErrors();
+    expect(errors).toHaveLength(2);
     expect(errors.join("\n")).toContain("AUTH_SECRET");
-    expect(errors.join("\n")).toContain("identity provider");
     expect(errors.join("\n")).toContain("ATLAS_ALLOWED_EMAILS");
   });
 
@@ -182,6 +207,59 @@ describe("configuration report", () => {
   it("reports nothing while developing locally", () => {
     setEnv({ NODE_ENV: "development", AUTH_SECRET: undefined });
     expect(configurationErrors()).toEqual([]);
+  });
+});
+
+describe("public read access", () => {
+  it("is off unless asked for by exact value", () => {
+    for (const value of [undefined, "", "false", "TRUE", "1", "yes"]) {
+      setEnv({ ATLAS_PUBLIC_ACCESS: value });
+      expect(publicReadAccessEnabled()).toBe(false);
+    }
+  });
+
+  it("is on for the exact value", () => {
+    setEnv({ ATLAS_PUBLIC_ACCESS: "true" });
+    expect(publicReadAccessEnabled()).toBe(true);
+  });
+
+  it("satisfies the configuration report with no sign-in at all", () => {
+    setEnv({ ...NO_AUTH_AT_ALL, ATLAS_PUBLIC_ACCESS: "true" });
+    expect(configurationErrors()).toEqual([]);
+  });
+
+  it("does not excuse a half-configured sign-in", () => {
+    setEnv({
+      ...NO_AUTH_AT_ALL,
+      ATLAS_PUBLIC_ACCESS: "true",
+      AUTH_GOOGLE_ID: "client-id",
+      AUTH_GOOGLE_SECRET: "client-secret",
+    });
+    // A provider is present, so the secret and allowlist are still required:
+    // public reading must not quietly turn into an open sign-in.
+    expect(configurationErrors().join("\n")).toContain("AUTH_SECRET");
+  });
+});
+
+describe("sign-in availability", () => {
+  it("is false with no provider, so next-auth is never invoked", () => {
+    setEnv({ ...NO_AUTH_AT_ALL, ATLAS_PUBLIC_ACCESS: "true" });
+    expect(signInAvailable()).toBe(false);
+  });
+
+  it("is false with a provider but no secret", () => {
+    setEnv({ ...NO_AUTH_AT_ALL, AUTH_GOOGLE_ID: "client-id", AUTH_GOOGLE_SECRET: "client-secret" });
+    expect(signInAvailable()).toBe(false);
+  });
+
+  it("is true once a provider and a secret exist", () => {
+    setEnv({
+      ...NO_AUTH_AT_ALL,
+      AUTH_GOOGLE_ID: "client-id",
+      AUTH_GOOGLE_SECRET: "client-secret",
+      AUTH_SECRET: "generated-secret",
+    });
+    expect(signInAvailable()).toBe(true);
   });
 });
 

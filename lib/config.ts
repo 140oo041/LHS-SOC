@@ -29,6 +29,41 @@ export function demoAuthEnabled() {
   return isLocalDevelopment() && process.env.ATLAS_DEMO_AUTH === "true";
 }
 
+/**
+ * Public read-only access: anyone may read Atlas without signing in.
+ *
+ * Opt-in by exact value, so losing the variable closes access rather than
+ * opening it. "Read-only" is not enforced here — it falls out of the role
+ * model. An unauthenticated visitor becomes a `viewer`, and every mutating
+ * route already requires `admin` or `editor`, so writes answer 403 and the
+ * edit controls never render. Nothing extra is needed to keep a public
+ * visitor from changing anything.
+ */
+export function publicReadAccessEnabled() {
+  return process.env.ATLAS_PUBLIC_ACCESS === "true";
+}
+
+function identityProviderConfigured() {
+  const google = Boolean(process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET);
+  const entra = Boolean(
+    process.env.AUTH_MICROSOFT_ENTRA_ID_ID &&
+      process.env.AUTH_MICROSOFT_ENTRA_ID_SECRET &&
+      process.env.AUTH_MICROSOFT_ENTRA_ID_ISSUER,
+  );
+  return google || entra;
+}
+
+/**
+ * Whether signing in is possible at all.
+ *
+ * Callers use this to avoid invoking next-auth when no provider and no secret
+ * exist, which would otherwise log MissingSecret on every request of an
+ * otherwise healthy public deployment.
+ */
+export function signInAvailable() {
+  return identityProviderConfigured() && Boolean(process.env.AUTH_SECRET || isLocalDevelopment());
+}
+
 // Lives in lib/features so client components can read it too; re-exported
 // here because the server-side callers already import from this module.
 export { aiIntegrationEnabled } from "@/lib/features";
@@ -91,29 +126,30 @@ export function configurationErrors(): string[] {
   if (isLocalDevelopment()) return [];
   const errors: string[] = [];
 
-  if (!process.env.AUTH_SECRET) {
-    errors.push("AUTH_SECRET is missing. Generate one with `openssl rand -base64 32`.");
-  }
+  // Sign-in is optional: a public deployment needs none of it. What is not
+  // optional is that a half-configured sign-in must never be reachable, so
+  // these are required only once a provider exists.
+  if (identityProviderConfigured()) {
+    if (!process.env.AUTH_SECRET) {
+      errors.push("AUTH_SECRET is missing. Generate one with `openssl rand -base64 32`.");
+    }
 
-  const hasGoogle = Boolean(process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET);
-  const hasEntra = Boolean(
-    process.env.AUTH_MICROSOFT_ENTRA_ID_ID &&
-      process.env.AUTH_MICROSOFT_ENTRA_ID_SECRET &&
-      process.env.AUTH_MICROSOFT_ENTRA_ID_ISSUER,
-  );
-  if (!hasGoogle && !hasEntra) {
-    errors.push("No identity provider is configured. Set the AUTH_GOOGLE_* or AUTH_MICROSOFT_ENTRA_ID_* variables.");
-  }
-
-  const admits =
-    process.env.ATLAS_ALLOWED_EMAILS ||
-    process.env.ATLAS_ALLOWED_EMAIL_DOMAINS ||
-    process.env.ATLAS_ADMIN_EMAILS ||
-    process.env.ATLAS_EDITOR_EMAILS;
-  if (!admits) {
+    const admits =
+      process.env.ATLAS_ALLOWED_EMAILS ||
+      process.env.ATLAS_ALLOWED_EMAIL_DOMAINS ||
+      process.env.ATLAS_ADMIN_EMAILS ||
+      process.env.ATLAS_EDITOR_EMAILS;
+    if (!admits) {
+      errors.push(
+        "An identity provider is configured but no one is admitted. Set ATLAS_ALLOWED_EMAILS to a " +
+          "comma-separated list of addresses, or ATLAS_ALLOWED_EMAIL_DOMAINS to admit whole domains.",
+      );
+    }
+  } else if (!publicReadAccessEnabled()) {
     errors.push(
-      "No one is admitted. Set ATLAS_ALLOWED_EMAILS to a comma-separated list of addresses, " +
-        "or ATLAS_ALLOWED_EMAIL_DOMAINS to admit whole domains.",
+      "Nobody can reach Atlas: no identity provider is configured and ATLAS_PUBLIC_ACCESS is not set. " +
+        "Either configure AUTH_GOOGLE_* or AUTH_MICROSOFT_ENTRA_ID_*, or set ATLAS_PUBLIC_ACCESS=true " +
+        "for public read-only access.",
     );
   }
 

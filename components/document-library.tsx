@@ -13,7 +13,18 @@ function formatBytes(value: number) {
   return `${(value / 1024 / 1024).toFixed(1)} MB`;
 }
 
-export function DocumentLibrary({ initialDocuments, wiki, canEdit }: { initialDocuments: DocumentAsset[]; wiki: WikiEntry[]; canEdit: boolean }) {
+export function DocumentLibrary({
+  initialDocuments,
+  wiki,
+  canEdit,
+  notice,
+}: {
+  initialDocuments: DocumentAsset[];
+  wiki: WikiEntry[];
+  canEdit: boolean;
+  /** Explains an empty register when no durable storage is attached. */
+  notice?: string;
+}) {
   const params = useSearchParams();
   const initialBlock = params.get("block") ?? "";
   const [documents, setDocuments] = useState(initialDocuments);
@@ -39,6 +50,7 @@ export function DocumentLibrary({ initialDocuments, wiki, canEdit }: { initialDo
     <div className="documents-page">
       <header className="documents-heading"><div><h1>Evidence library</h1><p>Git-backed design sources stay canonical. Managed files supplement them with ownership, versions, and architecture links.</p></div><span className="authority-key"><i />Canonical in Git <i />Managed attachment</span></header>
       {canEdit && <section className="upload-bench"><div><Icon name="upload" /><span><strong>Add supporting evidence</strong><small>PDF, image, Markdown, text, Word, or PowerPoint · 10 MB maximum</small></span></div><label>File<input ref={fileRef} type="file" /></label><label>Block IDs<input value={blockIds} onChange={(event) => setBlockIds(event.target.value)} placeholder="Optional: dma, coral-core" /></label><button type="button" onClick={() => void upload()} disabled={uploading}>{uploading ? "Uploading…" : "Add document"}</button></section>}
+      {notice && <p className="storage-notice" role="status">{notice}</p>}
       {error && <div className="page-error" role="alert">{error}<button onClick={() => setError("")}>Dismiss</button></div>}
       <section className="document-register">
         <header><h2>Repository sources</h2><span>{wiki.length} current files</span></header>

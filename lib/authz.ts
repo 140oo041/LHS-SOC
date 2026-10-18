@@ -1,29 +1,56 @@
 import { auth } from "@/auth";
-import { demoAuthEnabled, deploymentIsMisconfigured } from "@/lib/config";
-import type { Actor, Role } from "@/lib/domain";
+import {
+  demoAuthEnabled,
+  deploymentIsMisconfigured,
+  publicReadAccessEnabled,
+  signInAvailable,
+} from "@/lib/config";
+import { PUBLIC_VISITOR_EMAIL, type Actor, type Role } from "@/lib/domain";
 
 export async function currentActor(): Promise<Actor | null> {
-  // A deployment missing its secret, its provider, or its domain allowlist
-  // denies everyone rather than falling through to the demo actor below.
+  // A deployment whose sign-in is half-configured denies everyone rather than
+  // falling through to one of the actors below.
   if (deploymentIsMisconfigured()) return null;
 
-  const session = await auth();
-  if (session?.user?.email) {
+  // Skipped entirely when no provider and no secret exist: next-auth would
+  // log MissingSecret on every request of an otherwise healthy public site.
+  if (signInAvailable()) {
+    const session = await auth();
+    if (session?.user?.email) {
+      return {
+        email: session.user.email,
+        name: session.user.name ?? session.user.email.split("@")[0],
+        image: session.user.image,
+        role: session.user.role,
+      };
+    }
+  }
+
+  if (demoAuthEnabled()) {
     return {
-      email: session.user.email,
-      name: session.user.name ?? session.user.email.split("@")[0],
-      image: session.user.image,
-      role: session.user.role,
+      email: "architect@atlas.local",
+      name: "Avery Chen",
+      role: "admin",
     };
   }
 
-  if (!demoAuthEnabled()) return null;
+  // Public read access. `viewer` is what makes this safe: every mutating
+  // route requires admin or editor, so a visitor can read everything and
+  // change nothing.
+  if (publicReadAccessEnabled()) {
+    return {
+      email: PUBLIC_VISITOR_EMAIL,
+      name: "Public visitor",
+      role: "viewer",
+    };
+  }
 
-  return {
-    email: "architect@atlas.local",
-    name: "Avery Chen",
-    role: "admin",
-  };
+  return null;
+}
+
+/** True for the anonymous actor that public read access produces. */
+export function isPublicVisitor(actor: Actor | null) {
+  return actor?.email === PUBLIC_VISITOR_EMAIL;
 }
 
 export async function requireActor(allowed: Role[] = ["admin", "editor", "viewer"]) {

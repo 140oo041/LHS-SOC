@@ -14,7 +14,16 @@ const statusLabels: Record<TaskStatus, string> = {
   done: "Done",
 };
 
-export function TaskBoard({ initialTasks, canEdit }: { initialTasks: AtlasTask[]; canEdit: boolean }) {
+export function TaskBoard({
+  initialTasks,
+  canEdit,
+  notice,
+}: {
+  initialTasks: AtlasTask[];
+  canEdit: boolean;
+  /** Explains an empty board when no durable storage is attached. */
+  notice?: string;
+}) {
   const searchParams = useSearchParams();
   const blockFilter = searchParams.get("block");
   const [tasks, setTasks] = useState(initialTasks);
@@ -51,6 +60,7 @@ export function TaskBoard({ initialTasks, canEdit }: { initialTasks: AtlasTask[]
         <div><h1>Architecture work</h1><p>{blockFilter ? `Showing work linked to ${blockFilter}.` : "Move open design questions into owned, visible work without losing their architecture context."}</p></div>
         {canEdit && <button className="primary-button" type="button" onClick={() => setCreating((value) => !value)}><Icon name={creating ? "close" : "plus"} />{creating ? "Close" : "New task"}</button>}
       </header>
+      {notice && <p className="storage-notice" role="status">{notice}</p>}
       {error && <div className="page-error" role="alert">{error}<button onClick={() => setError("")}>Dismiss</button></div>}
       {creating && (
         <section className="task-composer">
