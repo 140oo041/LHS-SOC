@@ -311,7 +311,10 @@ export function DiagramCanvas({ snapshot, focusId, selectedId, lens, onSelect, o
                 // Keep the name legible when zoomed out. The header grows with
                 // it so the modules below are never overlapped by the title.
                 const renderedTitle = Math.max(titleSize, MIN_LABEL_PX / view.k);
-                const headerHeight = renderedTitle + 16;
+                // A top-side port draws its label along the upper edge, so the
+                // title drops below it rather than colliding with it.
+                const topPortInset = (snapshot.ports[id] ?? []).some((port) => port.side === "top") ? 13 : 0;
+                const headerHeight = renderedTitle + 16 + topPortInset;
                 const hasInternals =
                   enterable &&
                   rect.w * view.k > DETAIL_MIN_W &&
@@ -361,7 +364,7 @@ export function DiagramCanvas({ snapshot, focusId, selectedId, lens, onSelect, o
                     )}
                     {/* SVG text neither wraps nor ellipsises, so a long name is
                         clipped to its own block rather than bleeding across the canvas. */}
-                    <text className="node-title" x={9} y={renderedTitle * 0.82 + 9} style={{ fontSize: renderedTitle }}>
+                    <text className="node-title" x={9} y={renderedTitle * 0.82 + 9 + topPortInset} style={{ fontSize: renderedTitle }}>
                       {fitLabel(block.name, rect.w - 26, renderedTitle, 3) ?? ""}
                     </text>
                     {hasInternals && <line className="node-rule" x1={0} y1={headerHeight - 4} x2={rect.w} y2={headerHeight - 4} />}
