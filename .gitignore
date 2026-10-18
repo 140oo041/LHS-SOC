@@ -4,3 +4,13 @@ __pycache__/
 *.pyc
 .DS_Store
 hidden/
+.next/
+node_modules/
+public/legacy/
+public/logo.png
+.env
+.env.local
+.env.*.local
+coverage/
+*.tsbuildinfo
+atlas-uploads/

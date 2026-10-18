@@ -152,8 +152,24 @@
     document.querySelectorAll(".diagram-node").forEach(node => node.classList.toggle("selected", node.dataset.id === id));
     document.querySelectorAll(".internal-node").forEach(node => node.classList.toggle("selected", node.dataset.child === id));
     updateHierarchyNavigation();
+    notifyParentSelection(block);
     if (options.openSource && vscode) vscode.postMessage({ type: "openSymbol", id });
     if (window.innerWidth <= 820) requestAnimationFrame(() => document.getElementById("inspector").scrollIntoView({ block: "start", behavior: "smooth" }));
+  }
+
+  function notifyParentSelection(block) {
+    if (window.parent !== window) {
+      window.parent.postMessage({
+        type: "atlas-selection",
+        block: {
+          id: block.id,
+          name: block.name,
+          kind: block.kind,
+          summary: block.summary,
+          sourcePath: "architecture/soc.yaml"
+        }
+      }, window.location.origin);
+    }
   }
 
   function layoutBlocks(blocks, focusId) {
@@ -1123,5 +1139,6 @@
 
   populateFilters();
   render();
+  if (state.selected && byId.has(state.selected)) notifyParentSelection(byId.get(state.selected));
   vscode?.postMessage({ type: "ready" });
 })();

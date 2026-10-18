@@ -1,173 +1,151 @@
 {
   "schemaVersion": 2,
-  "generatedAt": "2026-10-13T03:57:46Z",
-  "title": "Design System: Coral Architecture Atlas",
+  "generatedAt": "2026-10-17T00:01:00-05:00",
+  "title": "Design System: Atlas",
   "extensions": {
     "colorMeta": {
-      "drafting-paper": { "role": "neutral", "displayName": "Drafting Paper", "canonical": "#e8edf0" },
-      "canvas-white": { "role": "neutral", "displayName": "Canvas White", "canonical": "#f7f9fa" },
-      "ink-black": { "role": "primary", "displayName": "Ink Black", "canonical": "#101c26" },
-      "hyperram-orange": { "role": "secondary", "displayName": "External HyperRAM Orange", "canonical": "#c25700" },
-      "axi-green": { "role": "tertiary", "displayName": "AXI Green", "canonical": "#55a63f" },
-      "tlul-blue-gray": { "role": "tertiary", "displayName": "TL-UL Blue-Gray", "canonical": "#9aabb5" },
-      "dbus-cyan": { "role": "tertiary", "displayName": "DBUS Cyan", "canonical": "#008faa" },
-      "ibus-red": { "role": "tertiary", "displayName": "IBUS Red", "canonical": "#ef3434" },
-      "ebus-yellow": { "role": "tertiary", "displayName": "EBUS Yellow", "canonical": "#eab308" },
-      "fabric-violet": { "role": "tertiary", "displayName": "Fabric Violet", "canonical": "#6d28d9" },
-      "control-slate": { "role": "neutral", "displayName": "Control Slate", "canonical": "#64748b" }
+      "paper": { "role": "neutral", "displayName": "Drafting Paper", "canonical": "#e8edf0", "tonalRamp": ["oklch(15% 0.007 233.6)", "oklch(27% 0.007 233.6)", "oklch(39% 0.007 233.6)", "oklch(51% 0.007 233.6)", "oklch(63% 0.007 233.6)", "oklch(75% 0.007 233.6)", "oklch(87% 0.007 233.6)", "oklch(95% 0.007 233.6)"] },
+      "paper-bright": { "role": "neutral", "displayName": "Bright Sheet", "canonical": "#f8fafb", "tonalRamp": ["oklch(15% 0.003 228.8)", "oklch(27% 0.003 228.8)", "oklch(39% 0.003 228.8)", "oklch(51% 0.003 228.8)", "oklch(63% 0.003 228.8)", "oklch(75% 0.003 228.8)", "oklch(87% 0.003 228.8)", "oklch(95% 0.003 228.8)"] },
+      "panel": { "role": "neutral", "displayName": "Bench Panel", "canonical": "#f1f5f6", "tonalRamp": ["oklch(15% 0.004 214.3)", "oklch(27% 0.004 214.3)", "oklch(39% 0.004 214.3)", "oklch(51% 0.004 214.3)", "oklch(63% 0.004 214.3)", "oklch(75% 0.004 214.3)", "oklch(87% 0.004 214.3)", "oklch(95% 0.004 214.3)"] },
+      "ink": { "role": "primary", "displayName": "Instrument Ink", "canonical": "#101c26", "tonalRamp": ["oklch(15% 0.026 244.5)", "oklch(27% 0.026 244.5)", "oklch(39% 0.026 244.5)", "oklch(51% 0.026 244.5)", "oklch(63% 0.026 244.5)", "oklch(75% 0.026 244.5)", "oklch(87% 0.026 244.5)", "oklch(95% 0.026 244.5)"] },
+      "ink-soft": { "role": "neutral", "displayName": "Soft Ink", "canonical": "#405260", "tonalRamp": ["oklch(15% 0.032 241.9)", "oklch(27% 0.032 241.9)", "oklch(39% 0.032 241.9)", "oklch(51% 0.032 241.9)", "oklch(63% 0.032 241.9)", "oklch(75% 0.032 241.9)", "oklch(87% 0.032 241.9)", "oklch(95% 0.032 241.9)"] },
+      "muted": { "role": "neutral", "displayName": "Muted Annotation", "canonical": "#5d6f7a", "tonalRamp": ["oklch(15% 0.028 234.9)", "oklch(27% 0.028 234.9)", "oklch(39% 0.028 234.9)", "oklch(51% 0.028 234.9)", "oklch(63% 0.028 234.9)", "oklch(75% 0.028 234.9)", "oklch(87% 0.028 234.9)", "oklch(95% 0.028 234.9)"] },
+      "rule": { "role": "neutral", "displayName": "Rule", "canonical": "#c6d1d6", "tonalRamp": ["oklch(15% 0.014 226.6)", "oklch(27% 0.014 226.6)", "oklch(39% 0.014 226.6)", "oklch(51% 0.014 226.6)", "oklch(63% 0.014 226.6)", "oklch(75% 0.014 226.6)", "oklch(87% 0.014 226.6)", "oklch(95% 0.014 226.6)"] },
+      "rule-strong": { "role": "neutral", "displayName": "Strong Rule", "canonical": "#91a3ad", "tonalRamp": ["oklch(15% 0.025 232.0)", "oklch(27% 0.025 232.0)", "oklch(39% 0.025 232.0)", "oklch(51% 0.025 232.0)", "oklch(63% 0.025 232.0)", "oklch(75% 0.025 232.0)", "oklch(87% 0.025 232.0)", "oklch(95% 0.025 232.0)"] },
+      "teal": { "role": "secondary", "displayName": "Evidence Teal", "canonical": "#087f8c", "tonalRamp": ["oklch(15% 0.092 207.5)", "oklch(27% 0.092 207.5)", "oklch(39% 0.092 207.5)", "oklch(51% 0.092 207.5)", "oklch(63% 0.092 207.5)", "oklch(75% 0.092 207.5)", "oklch(87% 0.092 207.5)", "oklch(95% 0.092 207.5)"] },
+      "teal-dark": { "role": "secondary", "displayName": "Deep Evidence Teal", "canonical": "#065b65", "tonalRamp": ["oklch(15% 0.072 208.1)", "oklch(27% 0.072 208.1)", "oklch(39% 0.072 208.1)", "oklch(51% 0.072 208.1)", "oklch(63% 0.072 208.1)", "oklch(75% 0.072 208.1)", "oklch(87% 0.072 208.1)", "oklch(95% 0.072 208.1)"] },
+      "red": { "role": "tertiary", "displayName": "Critical Red", "canonical": "#d83d36", "tonalRamp": ["oklch(15% 0.180 27.4)", "oklch(27% 0.180 27.4)", "oklch(39% 0.180 27.4)", "oklch(51% 0.180 27.4)", "oklch(63% 0.180 27.4)", "oklch(75% 0.180 27.4)", "oklch(87% 0.180 27.4)", "oklch(95% 0.180 27.4)"] },
+      "green": { "role": "tertiary", "displayName": "Ready Green", "canonical": "#488b38", "tonalRamp": ["oklch(15% 0.136 139.9)", "oklch(27% 0.136 139.9)", "oklch(39% 0.136 139.9)", "oklch(51% 0.136 139.9)", "oklch(63% 0.136 139.9)", "oklch(75% 0.136 139.9)", "oklch(87% 0.136 139.9)", "oklch(95% 0.136 139.9)"] },
+      "amber": { "role": "tertiary", "displayName": "Priority Amber", "canonical": "#b7650b", "tonalRamp": ["oklch(15% 0.137 58.7)", "oklch(27% 0.137 58.7)", "oklch(39% 0.137 58.7)", "oklch(51% 0.137 58.7)", "oklch(63% 0.137 58.7)", "oklch(75% 0.137 58.7)", "oklch(87% 0.137 58.7)", "oklch(95% 0.137 58.7)"] },
+      "purple": { "role": "tertiary", "displayName": "Administrator Purple", "canonical": "#6d28d9", "tonalRamp": ["oklch(15% 0.180 292.6)", "oklch(27% 0.180 292.6)", "oklch(39% 0.180 292.6)", "oklch(51% 0.180 292.6)", "oklch(63% 0.180 292.6)", "oklch(75% 0.180 292.6)", "oklch(87% 0.180 292.6)", "oklch(95% 0.180 292.6)"] },
+      "blue": { "role": "tertiary", "displayName": "Protocol Blue", "canonical": "#1764c0", "tonalRamp": ["oklch(15% 0.161 256.3)", "oklch(27% 0.161 256.3)", "oklch(39% 0.161 256.3)", "oklch(51% 0.161 256.3)", "oklch(63% 0.161 256.3)", "oklch(75% 0.161 256.3)", "oklch(87% 0.161 256.3)", "oklch(95% 0.161 256.3)"] },
+      "focus": { "role": "tertiary", "displayName": "Focus Blue", "canonical": "#006dc7", "tonalRamp": ["oklch(15% 0.163 252.6)", "oklch(27% 0.163 252.6)", "oklch(39% 0.163 252.6)", "oklch(51% 0.163 252.6)", "oklch(63% 0.163 252.6)", "oklch(75% 0.163 252.6)", "oklch(87% 0.163 252.6)", "oklch(95% 0.163 252.6)"] },
+      "danger": { "role": "tertiary", "displayName": "Danger Red", "canonical": "#aa2b24", "tonalRamp": ["oklch(15% 0.165 28.1)", "oklch(27% 0.165 28.1)", "oklch(39% 0.165 28.1)", "oklch(51% 0.165 28.1)", "oklch(63% 0.165 28.1)", "oklch(75% 0.165 28.1)", "oklch(87% 0.165 28.1)", "oklch(95% 0.165 28.1)"] }
     },
     "typographyMeta": {
-      "display": { "displayName": "View Display", "purpose": "Large uppercase statements in Boot flow and Ownership." },
-      "headline": { "displayName": "Inspector Headline", "purpose": "Selected block titles." },
-      "title": { "displayName": "Hardware Title", "purpose": "Uppercase block and container names." },
-      "body": { "displayName": "Workbench Body", "purpose": "Summaries, responsibilities, and explanatory copy." },
-      "label": { "displayName": "Engineering Label", "purpose": "Kinds, legends, controls, and metadata keys." },
-      "data": { "displayName": "Model Data", "purpose": "Counts, ownership, maturity, and port-role labels." }
+      "display": { "displayName": "Workbench Display", "purpose": "Oversized uppercase page identity and purposeful empty states." },
+      "headline": { "displayName": "Field Headline", "purpose": "Selected architecture objects and signature context." },
+      "title": { "displayName": "Section Title", "purpose": "Compact uppercase surface and section names." },
+      "body": { "displayName": "Technical Body", "purpose": "Explanations, reading, and conversations." },
+      "label": { "displayName": "Instrument Label", "purpose": "Wayfinding, state, and metadata keys." },
+      "data": { "displayName": "Source Data", "purpose": "Stable IDs, source paths, revisions, counts, and timestamps." }
     },
     "shadows": [
-      { "name": "module-rest", "value": "0 10px 24px rgba(24,48,63,.18)", "purpose": "Separates hardware boxes and outlined containers from routes." },
-      { "name": "module-hover", "value": "0 13px 28px rgba(24,48,63,.17)", "purpose": "Pairs with the 2px hover lift on solid interactive leaves." },
-      { "name": "module-selected", "value": "0 0 0 3px #f7f9fa, 0 0 0 6px var(--node-accent), 0 14px 30px rgba(24,48,63,.18)", "purpose": "Creates a readable paper gap and semantic selection ring." },
-      { "name": "overlay", "value": "0 14px 36px rgba(22,41,54,.14)", "purpose": "Search panel and toast elevation." }
+      { "name": "overlay", "value": "0 18px 42px rgba(16, 28, 38, 0.15)", "purpose": "Account popovers and mobile drawers." },
+      { "name": "composer", "value": "0 12px 28px rgba(16, 28, 38, 0.10)", "purpose": "Focused Copilot input desk." },
+      { "name": "ticket", "value": "0 7px 18px rgba(16, 28, 38, 0.07)", "purpose": "Movable work tickets." }
     ],
     "motion": [
-      { "name": "diagram-settle", "value": "180ms cubic-bezier(.16,1,.3,1)", "purpose": "Zoom and fitted-stage positioning." },
-      { "name": "module-state", "value": "160ms ease-out", "purpose": "Leaf hover, border, and selection transitions." },
-      { "name": "source-pulse", "value": "1.3s cubic-bezier(.16,1,.3,1)", "purpose": "One-shot source-location highlight." },
-      { "name": "boot-route-flow", "value": "650ms linear infinite", "purpose": "Moves the dash offset on live Boot routes." },
-      { "name": "boot-node-energy", "value": "1100ms cubic-bezier(.16,1,.3,1) infinite alternate", "purpose": "Breathes active Boot blocks between normal and energized states." },
-      { "name": "boot-step-interval", "value": "2300ms", "purpose": "Autoplay dwell time before advancing to the next Boot step." },
-      { "name": "reduced-motion", "value": ".01ms", "purpose": "Near-instant fallback for users who prefer reduced motion." }
+      { "name": "drawer", "value": "240ms cubic-bezier(.16,1,.3,1)", "purpose": "Instrument navigation entering and leaving a narrow viewport." },
+      { "name": "thread-drawer", "value": "220ms cubic-bezier(.16,1,.3,1)", "purpose": "Copilot thread ledger overlay." },
+      { "name": "diagram-settle", "value": "180ms cubic-bezier(.16,1,.3,1)", "purpose": "Legacy diagram zoom and fitted-stage positioning." },
+      { "name": "reduced-motion", "value": ".01ms", "purpose": "Near-instant transition fallback for reduced-motion users." }
     ],
     "breakpoints": [
-      { "name": "compact-desktop", "value": "1080px" },
-      { "name": "stacked-inspector", "value": "820px" },
-      { "name": "mobile-workbench", "value": "560px" }
+      { "name": "compact-desktop", "value": "1100px" },
+      { "name": "stacked-workbench", "value": "820px" },
+      { "name": "narrow-mobile", "value": "520px" }
     ]
   },
   "components": [
     {
-      "name": "Solid Hardware Leaf",
+      "name": "Primary Button",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Decisive workspace action in instrument ink.",
+      "html": "<button class=\"ds-btn-primary\">NEW TASK</button>",
+      "css": ".ds-btn-primary { min-height:42px; display:inline-flex; align-items:center; justify-content:center; padding:0 16px; border:0; border-radius:10px; background:var(--ink, #101c26); color:white; font:800 12px/1.2 'Atlas Ubuntu', Aptos, sans-serif; cursor:pointer; } .ds-btn-primary:hover { background:#283c4a; } .ds-btn-primary:focus-visible { outline:3px solid var(--focus, #006dc7); outline-offset:2px; } .ds-btn-primary:active { transform:translateY(1px); }"
+    },
+    {
+      "name": "Evidence Button",
+      "kind": "button",
+      "refersTo": "button-evidence",
+      "description": "Source-aware submit or upload action in deep teal.",
+      "html": "<button class=\"ds-btn-evidence\">ADD DOCUMENT</button>",
+      "css": ".ds-btn-evidence { min-height:40px; display:inline-flex; align-items:center; justify-content:center; padding:0 14px; border:0; border-radius:8px; background:var(--teal-dark, #065b65); color:white; font:800 10px/1.2 'Atlas Ubuntu', Aptos, sans-serif; cursor:pointer; } .ds-btn-evidence:hover { background:#087f8c; } .ds-btn-evidence:focus-visible { outline:3px solid var(--focus, #006dc7); outline-offset:2px; } .ds-btn-evidence:active { transform:translateY(1px); }"
+    },
+    {
+      "name": "Labeled Field",
+      "kind": "input",
+      "refersTo": "input",
+      "description": "Compact explicit field for engineering metadata.",
+      "html": "<label class=\"ds-field\"><span>BLOCK IDS</span><input value=\"dma, coral-core\" /></label>",
+      "css": ".ds-field { display:grid; gap:5px; color:var(--muted, #5d6f7a); font:800 9px/1.2 'Atlas Ubuntu', Aptos, sans-serif; letter-spacing:.08em; } .ds-field input { min-height:40px; padding:8px 10px; border:1px solid var(--rule-strong, #91a3ad); border-radius:8px; background:var(--paper-bright, #f8fafb); color:var(--ink, #101c26); font:400 11px/1.4 'Atlas Ubuntu', Aptos, sans-serif; } .ds-field input:hover { border-color:var(--ink, #101c26); } .ds-field input:focus-visible { outline:3px solid var(--focus, #006dc7); outline-offset:2px; }"
+    },
+    {
+      "name": "Active Instrument Navigation",
+      "kind": "nav",
+      "refersTo": "nav-active",
+      "description": "Reversed active section state for the ink instrument rail.",
+      "html": "<a class=\"ds-nav-active\" href=\"#\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><path d=\"M4 6h6v5H4zM14 6h6v5h-6zM9 15h6v5H9zM7 11v4m10-4v4M7 15h10\" /></svg><span>Architecture</span></a>",
+      "css": ".ds-nav-active { width:72px; min-height:64px; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:6px; padding:7px 2px; border-radius:10px; background:var(--paper-bright, #f8fafb); color:var(--ink, #101c26); font:750 9px/1 'Atlas Ubuntu', Aptos, sans-serif; text-decoration:none; } .ds-nav-active svg { width:20px; height:20px; fill:none; stroke:var(--teal, #087f8c); stroke-width:1.8; } .ds-nav-active:hover { background:#e2e9eb; } .ds-nav-active:focus-visible { outline:3px solid var(--focus, #006dc7); outline-offset:2px; }"
+    },
+    {
+      "name": "Architecture Field Action",
       "kind": "custom",
-      "refersTo": "leaf-module",
-      "description": "A leaf block with no visible children; the tall TL-UL Crossbar uses this same solid treatment.",
-      "html": "<button class=\"ds-leaf\"><span class=\"ds-leaf-accent\"></span><span class=\"ds-leaf-body\"><strong>FLASH CONTROLLER</strong><small>CONTROLLER</small></span><span class=\"ds-port\">TL-UL DEVICE</span></button>",
-      "css": ".ds-leaf { position:relative; width:220px; min-height:125px; display:grid; grid-template-rows:6px 1fr; overflow:hidden; padding:0; border:2px solid #101c26; border-radius:5px; background:#101c26; color:#fff; box-shadow:0 10px 24px rgba(24,48,63,.18); text-align:left; } .ds-leaf-accent { background:#087f8c; } .ds-leaf-body { position:relative; display:block; height:100%; padding:2px 10px 10px; overflow:hidden; } .ds-leaf strong { display:block; overflow:hidden; font:800 13px/1.05 'Coral Ubuntu Sans',sans-serif; text-overflow:ellipsis; text-transform:uppercase; white-space:nowrap; } .ds-leaf small { position:absolute; right:10px; bottom:8px; left:10px; overflow:hidden; color:#c8d4da; font-size:8px; font-weight:800; letter-spacing:.08em; text-overflow:ellipsis; text-transform:uppercase; white-space:nowrap; } .ds-port { position:absolute; right:3px; top:50%; max-width:74px; padding:3px 4px; border-radius:2px; background:#9aabb5; font:800 7px/1 SFMono-Regular,monospace; transform:translateY(-50%); }"
+      "refersTo": "field-action",
+      "description": "Context-preserving jump from a selected block to evidence-backed explanation.",
+      "html": "<a class=\"ds-field-action\" href=\"#\"><svg viewBox=\"0 0 24 24\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"4\"/><path d=\"M12 2v4m0 12v4M2 12h4m12 0h4\"/></svg><span><strong>ASK ATLAS</strong><small>Explain this block with evidence</small></span><b>→</b></a>",
+      "css": ".ds-field-action { min-height:64px; display:grid; grid-template-columns:25px 1fr 16px; align-items:center; gap:9px; padding:10px 15px; background:var(--ink, #101c26); color:white; text-decoration:none; font-family:'Atlas Ubuntu', Aptos, sans-serif; } .ds-field-action svg { width:20px; fill:none; stroke:#72d7dd; stroke-width:1.8; } .ds-field-action span { display:grid; } .ds-field-action strong { font-size:11px; } .ds-field-action small { margin-top:2px; color:#bdd0d8; font-size:9px; } .ds-field-action b { color:#bdd0d8; font-size:15px; } .ds-field-action:hover { background:#263b49; } .ds-field-action:focus-visible { outline:3px solid var(--focus, #006dc7); outline-offset:-3px; }"
     },
     {
-      "name": "Nested Hardware Container",
+      "name": "Source Register Row",
       "kind": "custom",
-      "refersTo": "nested-container",
-      "description": "An unfilled heavy outline with an explicit Open action, authored child positions, and visible internal protocol routing.",
-      "html": "<section class=\"ds-composite\"><header><span><strong>DMA</strong><small>ENGINE · 7 BLOCKS</small></span><button>OPEN →</button></header><div class=\"ds-internal\"><svg viewBox=\"0 0 300 130\"><path d=\"M70 35 H150 V92 H230\"/></svg><span class=\"ds-child a\">AXI MASTER</span><span class=\"ds-child b\">TRANSFER FIFO</span></div></section>",
-      "css": ".ds-composite { padding:9px; border:4px solid #101c26; border-radius:5px; background:#f7f9fa; color:#101c26; box-shadow:0 10px 24px rgba(24,48,63,.18); } .ds-composite header { display:flex; justify-content:space-between; padding:0 7px 8px; border-bottom:3px solid #101c26; } .ds-composite header span { display:grid; } .ds-composite header strong { font:800 17px/1 'Coral Ubuntu Sans',sans-serif; text-transform:uppercase; } .ds-composite header small { margin-top:4px; color:#596b77; font-size:9px; font-weight:800; letter-spacing:.08em; } .ds-composite header button { border:1px solid #91a2ad; border-radius:3px; background:transparent; font-size:9px; font-weight:800; } .ds-internal { position:relative; height:130px; margin-top:7px; } .ds-internal svg { position:absolute; inset:0; width:100%; height:100%; } .ds-internal path { fill:none; stroke:#55a63f; stroke-width:3; } .ds-child { position:absolute; padding:10px 8px; border-top:5px solid #55a63f; border-radius:3px; background:#101c26; color:#fff; font-size:10px; font-weight:800; } .ds-child.a { left:8px; top:10px; } .ds-child.b { right:8px; bottom:8px; }"
+      "refersTo": "source-row",
+      "description": "Editorial wiki row exposing count, title, summary, status, and repository path.",
+      "html": "<a class=\"ds-source-row\" href=\"#\"><b>03</b><span><strong>CORAL ARCHITECTURE OVERVIEW</strong><small>The editable companion to the architecture model.</small></span><code>docs/architecture-overview.md</code><i>→</i></a>",
+      "css": ".ds-source-row { width:min(720px, 100%); min-height:104px; display:grid; grid-template-columns:40px minmax(220px,1fr) minmax(160px,.55fr) 20px; align-items:center; gap:18px; padding:18px 8px; border-top:1px solid var(--rule, #c6d1d6); border-bottom:1px solid var(--rule, #c6d1d6); color:var(--ink, #101c26); text-decoration:none; font-family:'Atlas Ubuntu', Aptos, sans-serif; } .ds-source-row>b { align-self:start; color:var(--teal-dark, #065b65); font:800 12px/1.4 SFMono-Regular, monospace; } .ds-source-row span { display:grid; gap:8px; } .ds-source-row strong { font-size:18px; line-height:1; } .ds-source-row small { color:var(--ink-soft, #405260); font-size:11px; } .ds-source-row code { overflow:hidden; color:var(--muted, #5d6f7a); font:9px/1.4 SFMono-Regular, monospace; text-overflow:ellipsis; white-space:nowrap; } .ds-source-row i { font-style:normal; color:var(--muted, #5d6f7a); } .ds-source-row:hover { background:#eef3f4; } .ds-source-row:focus-visible { outline:3px solid var(--focus, #006dc7); outline-offset:2px; }"
     },
     {
-      "name": "Coral SoC Boundary",
-      "kind": "custom",
-      "description": "The heavy labeled enclosure around all non-external blocks in the active SoC focus.",
-      "html": "<div class=\"ds-boundary\"><span>CORAL SOC</span></div>",
-      "css": ".ds-boundary { position:relative; min-height:220px; border:5px solid #101c26; border-radius:7px; background:transparent; } .ds-boundary > span { position:absolute; top:-32px; left:-5px; padding:5px 10px 6px; border-radius:4px 4px 0 0; background:#101c26; color:#fff; font:800 13px 'Coral Ubuntu Sans',sans-serif; letter-spacing:.04em; text-transform:uppercase; }"
-    },
-    {
-      "name": "External HyperRAM Leaf",
-      "kind": "custom",
-      "refersTo": "external-hyperram",
-      "description": "The only orange hardware module, positioned outside the Coral SoC enclosure.",
-      "html": "<button class=\"ds-hyperram\"><span class=\"ds-hyperram-body\"><strong>HYPERRAM</strong><small>EXTERNAL MEMORY</small></span><span class=\"ds-hyperram-port\">HYPERRAM</span></button>",
-      "css": ".ds-hyperram { position:relative; width:260px; min-height:130px; overflow:hidden; padding:0; border:2px solid #9f4400; border-radius:5px; background:#c25700; color:#fff; text-align:left; box-shadow:0 10px 24px rgba(24,48,63,.18); } .ds-hyperram-body { position:relative; display:block; height:100%; padding:2px 10px 10px; } .ds-hyperram strong { display:block; overflow:hidden; font:800 13px/1.05 'Coral Ubuntu Sans',sans-serif; text-overflow:ellipsis; text-transform:uppercase; white-space:nowrap; } .ds-hyperram small { position:absolute; right:10px; bottom:8px; left:10px; overflow:hidden; color:#fff0df; font-size:8px; font-weight:800; letter-spacing:.08em; text-overflow:ellipsis; text-transform:uppercase; white-space:nowrap; } .ds-hyperram-port { position:absolute; right:3px; top:50%; max-width:74px; padding:3px 4px; overflow:hidden; border:1px solid rgba(255,255,255,.72); border-radius:2px; background:#64748b; font:800 7px/1 SFMono-Regular,monospace; text-overflow:ellipsis; text-transform:uppercase; white-space:nowrap; transform:translateY(-50%); }"
-    },
-    {
-      "name": "Protocol Route",
-      "kind": "custom",
-      "description": "An unlabeled orthogonal connection whose protocol color is decoded by inset endpoint badges and the legend.",
-      "html": "<svg viewBox=\"0 0 240 80\" aria-hidden=\"true\"><path class=\"ds-route\" d=\"M10 40 H120 V20 H230\"/></svg>",
-      "css": ".ds-route { fill:none; stroke:#55a63f; stroke-width:4; stroke-linecap:round; stroke-linejoin:round; opacity:.84; }"
-    },
-    {
-      "name": "Boundary Port-Role Badge",
-      "kind": "chip",
-      "refersTo": "port-badge-axi",
-      "description": "A small role label inset inside the exact authored endpoint edge; protocol color and offset come from the architecture model.",
-      "html": "<div class=\"ds-port-host\"><span class=\"ds-port ds-port-left\">AXI SLAVE</span><strong>HYPERRAM CONTROLLER</strong><span class=\"ds-port ds-port-right\">AXI MASTER</span></div>",
-      "css": ".ds-port-host { position:relative; width:230px; min-height:110px; display:grid; place-items:center; overflow:hidden; border:2px solid #101c26; border-radius:5px; background:#101c26; color:#fff; } .ds-port { position:absolute; max-width:74px; padding:3px 4px; overflow:hidden; border:1px solid rgba(255,255,255,.72); border-radius:2px; background:#55a63f; color:#fff; font:800 7px/1 SFMono-Regular,monospace; letter-spacing:.015em; text-overflow:ellipsis; text-transform:uppercase; white-space:nowrap; } .ds-port-left { left:3px; top:50%; transform:translateY(-50%); } .ds-port-right { right:3px; top:50%; transform:translateY(-50%); }"
-    },
-    {
-      "name": "Compact Nested Node",
-      "kind": "custom",
-      "description": "A dense internal block with reserved port side zones and a separate centered name zone; no kind or route text competes for space.",
-      "html": "<button class=\"ds-compact\"><span class=\"ds-cport left\">AXI SLAVE</span><strong>TRANSFER FIFO</strong><span class=\"ds-cport right\">AXI SLAVE</span></button>",
-      "css": ".ds-compact { position:relative; width:170px; height:105px; overflow:hidden; padding:0; border:1px solid #101c26; border-top:5px solid #d97706; border-radius:3px; background:#101c26; color:#fff; } .ds-compact strong { position:absolute; top:50%; right:37%; left:37%; max-height:2.1em; overflow:hidden; font:800 8px/1.05 'Coral Ubuntu Sans',sans-serif; text-align:center; text-overflow:ellipsis; text-transform:uppercase; transform:translateY(-50%); } .ds-cport { position:absolute; top:50%; max-width:36%; padding:1px 2px; overflow:hidden; border-radius:2px; background:#55a63f; font:800 4.5px/1 SFMono-Regular,monospace; text-overflow:ellipsis; text-transform:uppercase; white-space:nowrap; transform:translateY(-50%); } .ds-cport.left { left:3px; } .ds-cport.right { right:3px; }"
-    },
-    {
-      "name": "Boot Playback Tray",
-      "kind": "custom",
-      "refersTo": "boot-player",
-      "description": "An eight-step player over the authored SoC diagram with route flow, block energy, direct progress navigation, and manual controls.",
-      "html": "<section class=\"ds-boot\"><div><small>STEP 2 OF 8 · CONCURRENT HARDWARE</small><h2>INITIALIZE MEMORIES</h2><p>Start HyperRAM and flash power-on sequences.</p></div><nav><button>◀</button><button>Ⅱ PAUSE</button><button>▶</button></nav><div class=\"ds-progress\"><i class=\"done\"></i><i class=\"current\"></i><i></i><i></i><i></i><i></i><i></i><i></i></div></section>",
-      "css": ".ds-boot { display:grid; grid-template-columns:1fr auto; gap:8px 18px; min-height:108px; padding:13px 15px 11px; border:1px solid #314451; border-radius:10px; background:rgba(16,28,38,.96); box-shadow:0 16px 34px rgba(16,28,38,.22); color:#fff; } .ds-boot small { color:#c8d4da; font:800 9px SFMono-Regular,monospace; letter-spacing:.05em; } .ds-boot h2 { margin:4px 0; font:800 18px/1 'Coral Ubuntu Sans',sans-serif; } .ds-boot p { margin:0; color:#d8e2e7; font-size:10px; } .ds-boot nav { align-self:center; display:flex; } .ds-boot button { min-height:38px; border:1px solid #536774; background:transparent; color:#fff; } .ds-progress { grid-column:1/-1; display:grid; grid-template-columns:repeat(8,1fr); gap:4px; } .ds-progress i { height:3px; background:#536774; } .ds-progress .done { background:#55a63f; } .ds-progress .current { height:7px; background:#fff; }"
-    },
-    {
-      "name": "Evidence Resource Link",
+      "name": "Task Ticket",
       "kind": "card",
-      "refersTo": "evidence-link",
-      "description": "A precise document, issue, or RTL reference in the selected-block inspector.",
-      "html": "<a class=\"ds-resource\" href=\"#\"><span class=\"ds-resource-icon\">↗</span><span><strong>Architecture overview</strong><small>docs/architecture-overview.md</small></span><b>→</b></a>",
-      "css": ".ds-resource { min-height:48px; display:grid; grid-template-columns:30px 1fr auto; align-items:center; gap:9px; padding:7px 9px; border:1px solid #c5d0d6; border-radius:11px; background:#f7f9fa; color:#101c26; text-decoration:none; } .ds-resource-icon { width:30px; height:30px; display:grid; place-items:center; border-radius:8px; background:#dde5e8; } .ds-resource strong,.ds-resource small { display:block; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .ds-resource strong { font-size:11px; } .ds-resource small { margin-top:2px; color:#596b77; font:9px SFMono-Regular,monospace; }"
+      "refersTo": "task-ticket",
+      "description": "Movable engineering work with priority, architecture link, and owner.",
+      "html": "<article class=\"ds-ticket\"><header><b>HIGH</b><time>OCT 24</time></header><h3>Resolve DTCM arbitration</h3><p>Confirm ownership and the accepted request order.</p><a href=\"#\">dtcm-arbiter</a><footer>UNASSIGNED <span>REVIEW</span></footer></article>",
+      "css": ".ds-ticket { width:230px; padding:11px; border:1px solid var(--rule-strong, #91a3ad); border-top-color:var(--amber, #b7650b); border-radius:12px; background:var(--paper-bright, #f8fafb); color:var(--ink, #101c26); box-shadow:0 7px 18px rgba(16,28,38,.07); font-family:'Atlas Ubuntu', Aptos, sans-serif; } .ds-ticket header { display:flex; justify-content:space-between; color:var(--amber, #b7650b); font-size:8px; } .ds-ticket h3 { margin:9px 0 0; font-size:12px; } .ds-ticket p { margin:7px 0 0; color:var(--muted, #5d6f7a); font-size:9px; } .ds-ticket a { display:inline-block; margin-top:10px; padding:3px 5px; border:1px solid var(--rule, #c6d1d6); border-radius:4px; color:inherit; font:7px/1.2 SFMono-Regular, monospace; text-decoration:none; } .ds-ticket footer { display:flex; justify-content:space-between; margin-top:12px; padding-top:8px; border-top:1px solid var(--rule, #c6d1d6); color:var(--muted, #5d6f7a); font-size:8px; } .ds-ticket:hover { border-color:var(--ink, #101c26); } .ds-ticket a:focus-visible { outline:3px solid var(--focus, #006dc7); outline-offset:2px; }"
+    },
+    {
+      "name": "Evidence Citation",
+      "kind": "custom",
+      "refersTo": "citation",
+      "description": "Inspectable source attached directly to an assistant answer.",
+      "html": "<a class=\"ds-citation\" href=\"#\"><b>1</b><span><strong>Architecture overview</strong><code>docs/architecture-overview.md</code></span></a>",
+      "css": ".ds-citation { width:240px; min-width:0; display:grid; grid-template-columns:20px 1fr; gap:6px; padding:7px; border:1px solid var(--rule, #c6d1d6); border-radius:8px; background:var(--panel, #f1f5f6); color:var(--ink, #101c26); text-decoration:none; font-family:'Atlas Ubuntu', Aptos, sans-serif; } .ds-citation>b { width:20px; height:20px; display:grid; place-items:center; border-radius:50%; background:var(--teal-dark, #065b65); color:white; font:8px/1 SFMono-Regular, monospace; } .ds-citation span { min-width:0; display:grid; gap:2px; } .ds-citation strong,.ds-citation code { overflow:hidden; text-overflow:ellipsis; white-space:nowrap; } .ds-citation strong { font-size:9px; } .ds-citation code { color:var(--muted, #5d6f7a); font:7px/1.3 SFMono-Regular, monospace; } .ds-citation:hover { border-color:var(--ink, #101c26); } .ds-citation:focus-visible { outline:3px solid var(--focus, #006dc7); outline-offset:2px; }"
     }
   ],
   "narrative": {
-    "northStar": "Box Diagram Workbench",
-    "overview": "A bright lab drafting table turns the original box diagram into a connected, inspectable architecture panorama. Fixed node rectangles and port anchors are authored in architecture/soc.yaml; the interface never auto-places them. Heavy unfilled containers expose immediate blocks and internal routes; only leaves are solid. Small port-role badges sit inside block edges and carry interface meaning, so routes omit text. Leaf titles and kinds occupy separate bands; compact nodes reserve side zones for ports and a centered name zone. Visible text never intersects.",
+    "northStar": "The Instrumented Field Notebook",
+    "overview": "Atlas is an Operate-mode engineering workbench: an explorable architecture instrument joined to a disciplined field log. The product helps engineers move from a hardware block or design question to source evidence, explanation, ownership, documents, and work without losing the original architecture context. Its visual world is inherited from the Coral Architecture Atlas—bright drafting paper, ink-black rails, exact rules, terse labels, and diagram-first interaction—rather than from a generic SaaS dashboard.\n\nThe durable design contract is concept seed ed7718f6, candidate 3: contextual workbench plus field log. Interfaces should feel candid, technical, and reviewable. Expressive moments come from scale, information geometry, and the architecture itself; chrome stays disciplined.",
     "keyCharacteristics": [
-      "Bright dotted drafting canvas with a pannable, zoomable panorama.",
-      "Unfilled heavy-outline hierarchy containers around solid leaf modules.",
-      "Tall solid TL-UL Crossbar as the interconnect spine.",
-      "Authored fixed-position canvases with no automatic placement.",
-      "Explicit protocol-colored MASTER/SLAVE, HOST/DEVICE, bus, fabric, and control port badges.",
-      "Unlabeled routes decoded by endpoint badges and the protocol legend.",
-      "Collision-free title, kind, centered-name, and port zones.",
-      "Visible internal protocol routing inside composite previews.",
-      "Explicit Open, Up, and breadcrumb hierarchy navigation.",
-      "Boot playback over the authored diagram with reduced-motion-safe behavior.",
-      "Orange external HyperRAM outside the Coral SoC enclosure.",
-      "Protocol-colored orthogonal routes with labels and a persistent legend.",
-      "Readable mobile and VS Code canvas-plus-inspector behavior."
+      "Instrument shell with a persistent workspace bar and narrow section rail.",
+      "High-density engineering information separated by rules and tonal paper layers.",
+      "Oversized uppercase orientation paired with compact metadata and monospaced source data.",
+      "Architecture context carried into evidence, Copilot, tasks, and documents.",
+      "Provenance and uncertainty visible at the point of action."
     ],
     "rules": [
-      { "name": "The Protocol Is Data Rule", "body": "Never recolor AXI, TL-UL, DBUS, IBUS, EBUS, or Fabric for decoration; repeat meaning in labels and the legend.", "section": "colors" },
-      { "name": "The Orange Is Outside Rule", "body": "Orange identifies external HyperRAM, not a general action accent.", "section": "colors" },
-      { "name": "The Schematic Label Rule", "body": "Hardware names and kinds are terse, uppercase, and heavier than metadata.", "section": "typography" },
-      { "name": "The No-Collision Rule", "body": "Every visible string owns a reserved zone; text may auto-fit or truncate but must never intersect another label, badge, border, or route.", "section": "typography" },
-      { "name": "The Containment Before Elevation Rule", "body": "Use heavy outlines and exposed children to communicate hierarchy; never replace nesting with fill or a larger shadow.", "section": "elevation" }
+      { "name": "The Semantic Color Rule", "body": "Outside ink, paper, and teal, color must encode a named engineering or application state.", "section": "colors" },
+      { "name": "The Authority Contrast Rule", "body": "Canonical content uses ink; managed or generated material uses teal or a visibly secondary treatment.", "section": "colors" },
+      { "name": "The Two-Register Rule", "body": "Use uppercase sans for orientation and mono for evidence; never turn explanatory paragraphs into all caps or render ordinary prose as code.", "section": "typography" },
+      { "name": "The Context-Follows-Content Rule", "body": "On narrow screens, primary evidence or conversation comes first and its field log follows; context may move, but it must not disappear.", "section": "layout" },
+      { "name": "The Flat-by-Default Rule", "body": "If a rule or paper-tone change explains the hierarchy, do not add a shadow.", "section": "elevation" },
+      { "name": "The Engineered Edge Rule", "body": "Do not apply one universal radius. Shape communicates whether an object is structure, control, movable work, or identity.", "section": "shapes" },
+      { "name": "The Evidence-at-the-Action Rule", "body": "Every AI answer, generated visual, upload, and design decision must expose its provenance or authority exactly where a user acts on it.", "section": "components" }
     ],
     "dos": [
-      "Do preserve the unfilled-container and solid-leaf hierarchy at every nesting level.",
-      "Do treat authored canvas rectangles and port anchors as visual source of truth.",
-      "Do show exact port roles inset inside their authored boundary offsets.",
-      "Do omit route text and use endpoint badges plus the legend for interface meaning.",
-      "Do reserve separate text and port zones; auto-fit leaf titles only to the 8px floor.",
-      "Do show internal routes behind children in composite previews.",
-      "Do preserve Open, Up, and breadcrumb hierarchy navigation.",
-      "Do keep Boot playback on the structural diagram and disable autoplay for reduced motion.",
-      "Do keep the tall TL-UL Crossbar solid because it is a leaf.",
-      "Do keep HyperRAM orange and outside the heavy Coral SoC enclosure.",
-      "Do preserve exact protocol color names, endpoint port-role labels, and legend keys.",
-      "Do retain pan, zoom, fit, and readable stacked evidence behavior on mobile and in VS Code."
+      "Do preserve architecture context across Wiki, Copilot, Tasks, and Documents via stable IDs and visible source paths.",
+      "Do distinguish canonical Git truth, managed evidence, and generated explanation in both copy and visual treatment.",
+      "Do use rules, paper tones, compact metadata, and uppercase wayfinding to create hierarchy before adding containers.",
+      "Do keep keyboard focus, drawer dismissal, reduced motion, touch sizing, and readable narrow-screen order at WCAG 2.2 AA fundamentals.",
+      "Do make uncertainty, missing evidence, retention, permissions, and failure states explicit."
     ],
     "donts": [
-      "Don't solid-fill SoC, DMA, Coral Core, or any composite block.",
-      "Don't introduce automatic placement, rank-based reflow, or inferred port positions.",
-      "Don't replace MASTER/SLAVE or HOST/DEVICE with vague protocol-only badges.",
-      "Don't place port badges outside their block boundaries.",
-      "Don't draw text on routes or let any visible strings intersect.",
-      "Don't wrap leaf titles or shrink them below 8px.",
-      "Don't hide internal connection routes in composite previews.",
-      "Don't replace Boot playback with a separate timeline or autoplay it for reduced-motion users.",
-      "Don't turn the architecture into a generic card grid, bubble graph, or rounded SaaS dashboard.",
-      "Don't use protocol colors decoratively or remap them for state.",
-      "Don't hide unknown ownership, missing evidence, or unconfirmed RTL.",
-      "Don't shrink the mobile panorama until labels and hierarchy become unreadable."
+      "Don't turn Atlas into a generic card dashboard with gradients, glass, soft pastel decoration, oversized empty padding, or rounded panels everywhere.",
+      "Don't use protocol, priority, role, or status colors decoratively or without a visible legend or label.",
+      "Don't let AI output resemble canonical design truth; never hide citations, source paths, expiry, or generated status.",
+      "Don't collapse the five task states or remove field-log context on mobile; reflow or allow deliberate scrolling instead.",
+      "Don't invent customer claims, production metrics, finalized RTL anchors, or certainty the source record does not provide.",
+      "Don't treat development overlays or framework badges visible in local screenshots as Atlas product UI."
     ]
   }
 }
