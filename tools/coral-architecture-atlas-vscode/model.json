@@ -437,87 +437,105 @@
       },
       "coral-soc": {
         "canvas": {
-          "width": 2020,
-          "height": 1050
+          "width": 2100,
+          "height": 1260
         },
         "nodes": {
           "external-hyperram": {
             "x": 30,
             "y": 100,
-            "width": 260,
+            "width": 250,
             "height": 130
           },
           "hyperram-controller": {
-            "x": 330,
+            "x": 320,
             "y": 100,
-            "width": 280,
+            "width": 270,
             "height": 130
           },
           "hyperram-arbiter": {
-            "x": 650,
+            "x": 630,
             "y": 100,
-            "width": 260,
+            "width": 220,
             "height": 130
           },
           "hyperram-bridge": {
-            "x": 950,
+            "x": 890,
             "y": 100,
-            "width": 400,
+            "width": 260,
             "height": 130
           },
           "dma": {
-            "x": 330,
+            "x": 320,
             "y": 270,
-            "width": 720,
-            "height": 280
+            "width": 830,
+            "height": 230
+          },
+          "core-axi-arbiter": {
+            "x": 890,
+            "y": 540,
+            "width": 220,
+            "height": 100
+          },
+          "core-slave-bridge": {
+            "x": 1190,
+            "y": 540,
+            "width": 250,
+            "height": 100
           },
           "coral-core": {
-            "x": 330,
-            "y": 590,
-            "width": 720,
+            "x": 320,
+            "y": 680,
+            "width": 830,
             "height": 400
           },
           "core-bridge": {
-            "x": 1090,
-            "y": 725,
-            "width": 280,
-            "height": 130
+            "x": 1190,
+            "y": 800,
+            "width": 250,
+            "height": 110
           },
           "crossbar": {
-            "x": 1410,
+            "x": 1480,
             "y": 100,
-            "width": 260,
-            "height": 810
+            "width": 220,
+            "height": 980
           },
           "flash-controller": {
-            "x": 1710,
+            "x": 1760,
             "y": 100,
-            "width": 280,
+            "width": 300,
             "height": 130
           },
           "host-link": {
-            "x": 1710,
+            "x": 1760,
             "y": 270,
-            "width": 280,
+            "width": 300,
             "height": 130
           },
           "uart": {
-            "x": 1710,
+            "x": 1760,
             "y": 440,
-            "width": 280,
+            "width": 300,
             "height": 130
           },
           "control": {
-            "x": 1710,
+            "x": 1760,
             "y": 610,
-            "width": 280,
+            "width": 300,
             "height": 130
           },
           "other-peripherals": {
-            "x": 1710,
+            "x": 1760,
             "y": 780,
-            "width": 280,
+            "width": 300,
             "height": 130
+          },
+          "other-devices": {
+            "x": 1480,
+            "y": 1120,
+            "width": 220,
+            "height": 110
           }
         }
       },
@@ -1188,7 +1206,7 @@
           "label": "AXI MASTER \u00b7 CORE",
           "protocol": "axi",
           "side": "bottom",
-          "offset": 0.35
+          "offset": 0.75
         },
         "tlul": {
           "label": "TL-UL DEVICE",
@@ -1202,13 +1220,47 @@
           "label": "AXI SLAVE",
           "protocol": "axi",
           "side": "top",
-          "offset": 0.25
+          "offset": 0.8
         },
         "axi": {
           "label": "AXI MASTER",
           "protocol": "axi",
           "side": "right",
           "offset": 0.55
+        }
+      },
+      "core-axi-arbiter": {
+        "dma": {
+          "label": "AXI SLAVE",
+          "protocol": "axi",
+          "side": "top",
+          "offset": 0.3
+        },
+        "bridge": {
+          "label": "AXI SLAVE",
+          "protocol": "axi",
+          "side": "right",
+          "offset": 0.5
+        },
+        "core": {
+          "label": "AXI MASTER",
+          "protocol": "axi",
+          "side": "bottom",
+          "offset": 0.5
+        }
+      },
+      "core-slave-bridge": {
+        "axi": {
+          "label": "AXI MASTER",
+          "protocol": "axi",
+          "side": "left",
+          "offset": 0.5
+        },
+        "tlul": {
+          "label": "TL-UL DEVICE",
+          "protocol": "tlul",
+          "side": "right",
+          "offset": 0.5
         }
       },
       "core-bridge": {
@@ -1230,49 +1282,61 @@
           "label": "TL-UL HOST",
           "protocol": "tlul",
           "side": "left",
-          "offset": 0.08
+          "offset": 0.066
         },
         "dma": {
           "label": "TL-UL HOST",
           "protocol": "tlul",
           "side": "left",
-          "offset": 0.395
+          "offset": 0.29
+        },
+        "coreslave": {
+          "label": "TL-UL HOST",
+          "protocol": "tlul",
+          "side": "left",
+          "offset": 0.5
         },
         "core": {
           "label": "TL-UL HOST",
           "protocol": "tlul",
           "side": "left",
-          "offset": 0.852
+          "offset": 0.77
         },
         "flash": {
           "label": "TL-UL DEVICE",
           "protocol": "tlul",
           "side": "right",
-          "offset": 0.08
+          "offset": 0.066
         },
         "host": {
           "label": "TL-UL DEVICE",
           "protocol": "tlul",
           "side": "right",
-          "offset": 0.29
+          "offset": 0.24
         },
         "uart": {
           "label": "TL-UL DEVICE",
           "protocol": "tlul",
           "side": "right",
-          "offset": 0.5
+          "offset": 0.41
         },
         "control": {
           "label": "TL-UL DEVICE",
           "protocol": "tlul",
           "side": "right",
-          "offset": 0.71
+          "offset": 0.587
         },
         "other": {
           "label": "TL-UL DEVICE",
           "protocol": "tlul",
           "side": "right",
-          "offset": 0.92
+          "offset": 0.76
+        },
+        "expansion": {
+          "label": "TL-UL DEVICE",
+          "protocol": "tlul",
+          "side": "bottom",
+          "offset": 0.5
         }
       },
       "flash-controller": {
@@ -1312,6 +1376,14 @@
           "label": "TL-UL DEVICE",
           "protocol": "tlul",
           "side": "left",
+          "offset": 0.5
+        }
+      },
+      "other-devices": {
+        "tlul": {
+          "label": "TL-UL DEVICE",
+          "protocol": "tlul",
+          "side": "top",
           "offset": 0.5
         }
       },
@@ -2615,6 +2687,51 @@
         "rtl": []
       },
       {
+        "id": "core-axi-arbiter",
+        "name": "Core AXI Arbiter",
+        "kind": "arbiter",
+        "summary": "Arbitrates inbound AXI access to Coral Core between the DMA core master and the SoC fabric.",
+        "parent": "coral-soc",
+        "owner": "unassigned",
+        "maturity": "proposal",
+        "rank": 3,
+        "order": 2,
+        "responsibilities": [
+          "Select between DMA and fabric requests for the Coral Core AXI slave.",
+          "Present a single AXI master to the core boundary."
+        ],
+        "documents": [
+          {
+            "title": "Original block diagram",
+            "path": "SoC_arch.png"
+          }
+        ],
+        "issues": [],
+        "rtl": []
+      },
+      {
+        "id": "core-slave-bridge",
+        "name": "Core Slave AXI\u2013TL-UL Bridge",
+        "kind": "bridge",
+        "summary": "Adapts inbound TL-UL requests from the crossbar into AXI for the Coral Core arbiter.",
+        "parent": "coral-soc",
+        "owner": "unassigned",
+        "maturity": "proposal",
+        "rank": 3,
+        "order": 3,
+        "responsibilities": [
+          "Convert fabric transactions into AXI requests toward Coral Core."
+        ],
+        "documents": [
+          {
+            "title": "Original block diagram",
+            "path": "SoC_arch.png"
+          }
+        ],
+        "issues": [],
+        "rtl": []
+      },
+      {
         "id": "crossbar",
         "name": "TL-UL Crossbar",
         "kind": "interconnect",
@@ -2752,6 +2869,28 @@
         "order": 4,
         "responsibilities": [
           "Reserve an explicit expansion seam for future devices."
+        ],
+        "documents": [
+          {
+            "title": "Original block diagram",
+            "path": "SoC_arch.png"
+          }
+        ],
+        "issues": [],
+        "rtl": []
+      },
+      {
+        "id": "other-devices",
+        "name": "Other Devices",
+        "kind": "peripheral-group",
+        "summary": "Second unnamed device group on the crossbar, drawn below the fabric in the source diagram.",
+        "parent": "coral-soc",
+        "owner": "unassigned",
+        "maturity": "proposal",
+        "rank": 5,
+        "order": 5,
+        "responsibilities": [
+          "Reserve the second expansion seam the source diagram records."
         ],
         "documents": [
           {
@@ -4531,10 +4670,40 @@
         "id": "dma-core",
         "from": "dma",
         "from_port": "core",
-        "to": "coral-core",
+        "to": "core-axi-arbiter",
         "to_port": "dma",
         "protocol": "axi",
         "label": "TCM access",
+        "bidirectional": true
+      },
+      {
+        "id": "fabric-core-slave",
+        "from": "crossbar",
+        "from_port": "coreslave",
+        "to": "core-slave-bridge",
+        "to_port": "tlul",
+        "protocol": "tlul",
+        "label": "inbound TL-UL",
+        "bidirectional": true
+      },
+      {
+        "id": "core-slave-arbiter",
+        "from": "core-slave-bridge",
+        "from_port": "axi",
+        "to": "core-axi-arbiter",
+        "to_port": "bridge",
+        "protocol": "axi",
+        "label": "inbound AXI",
+        "bidirectional": true
+      },
+      {
+        "id": "core-arbiter-core",
+        "from": "core-axi-arbiter",
+        "from_port": "core",
+        "to": "coral-core",
+        "to_port": "dma",
+        "protocol": "axi",
+        "label": "arbitrated TCM access",
         "bidirectional": true
       },
       {
@@ -4602,6 +4771,16 @@
         "from": "crossbar",
         "from_port": "other",
         "to": "other-peripherals",
+        "to_port": "tlul",
+        "protocol": "tlul",
+        "label": "expansion",
+        "bidirectional": true
+      },
+      {
+        "id": "other-devices-fabric",
+        "from": "crossbar",
+        "from_port": "expansion",
+        "to": "other-devices",
         "to_port": "tlul",
         "protocol": "tlul",
         "label": "expansion",
@@ -5507,6 +5686,28 @@
       "matches": []
     },
     {
+      "id": "core-axi-arbiter",
+      "name": "Core AXI Arbiter",
+      "kind": "arbiter",
+      "section": "interconnect",
+      "open": {
+        "file": "architecture/soc.yaml",
+        "needle": "  - id: core-axi-arbiter"
+      },
+      "matches": []
+    },
+    {
+      "id": "core-slave-bridge",
+      "name": "Core Slave AXI\u2013TL-UL Bridge",
+      "kind": "bridge",
+      "section": "interconnect",
+      "open": {
+        "file": "architecture/soc.yaml",
+        "needle": "  - id: core-slave-bridge"
+      },
+      "matches": []
+    },
+    {
       "id": "crossbar",
       "name": "TL-UL Crossbar",
       "kind": "interconnect",
@@ -5569,6 +5770,17 @@
       "open": {
         "file": "architecture/soc.yaml",
         "needle": "  - id: other-peripherals"
+      },
+      "matches": []
+    },
+    {
+      "id": "other-devices",
+      "name": "Other Devices",
+      "kind": "peripheral-group",
+      "section": "control",
+      "open": {
+        "file": "architecture/soc.yaml",
+        "needle": "  - id: other-devices"
       },
       "matches": []
     },
@@ -6473,8 +6685,30 @@
           "note": "Proposal \u00b7 owner unassigned"
         },
         {
-          "id": "overview-crossbar",
+          "id": "overview-core-axi-arbiter",
           "step": "07",
+          "title": "Core AXI Arbiter",
+          "description": "Arbitrates inbound AXI access to Coral Core between the DMA core master and the SoC fabric.",
+          "section": "interconnect",
+          "symbols": [
+            "core-axi-arbiter"
+          ],
+          "note": "Proposal \u00b7 owner unassigned"
+        },
+        {
+          "id": "overview-core-slave-bridge",
+          "step": "08",
+          "title": "Core Slave AXI\u2013TL-UL Bridge",
+          "description": "Adapts inbound TL-UL requests from the crossbar into AXI for the Coral Core arbiter.",
+          "section": "interconnect",
+          "symbols": [
+            "core-slave-bridge"
+          ],
+          "note": "Proposal \u00b7 owner unassigned"
+        },
+        {
+          "id": "overview-crossbar",
+          "step": "09",
           "title": "TL-UL Crossbar",
           "description": "Central SoC fabric connecting compute and memory paths to control and peripherals.",
           "section": "interconnect",
@@ -6485,7 +6719,7 @@
         },
         {
           "id": "overview-flash-controller",
-          "step": "08",
+          "step": "10",
           "title": "Flash Controller",
           "description": "Provides nonvolatile boot and program storage access.",
           "section": "control",
@@ -6496,7 +6730,7 @@
         },
         {
           "id": "overview-host-link",
-          "step": "09",
+          "step": "11",
           "title": "Host Link",
           "description": "External host path used for host-assisted boot and control.",
           "section": "control",
@@ -6507,7 +6741,7 @@
         },
         {
           "id": "overview-uart",
-          "step": "10",
+          "step": "12",
           "title": "UART",
           "description": "Serial communications peripheral on the TL-UL fabric.",
           "section": "control",
@@ -6518,7 +6752,7 @@
         },
         {
           "id": "overview-control",
-          "step": "11",
+          "step": "13",
           "title": "Control",
           "description": "SoC-level reset, boot, clock, interrupt, and control functions.",
           "section": "control",
@@ -6529,12 +6763,23 @@
         },
         {
           "id": "overview-other-peripherals",
-          "step": "12",
+          "step": "14",
           "title": "Other Peripherals",
           "description": "Planned TL-UL devices not yet decomposed in the architecture model.",
           "section": "control",
           "symbols": [
             "other-peripherals"
+          ],
+          "note": "Proposal \u00b7 owner unassigned"
+        },
+        {
+          "id": "overview-other-devices",
+          "step": "15",
+          "title": "Other Devices",
+          "description": "Second unnamed device group on the crossbar, drawn below the fabric in the source diagram.",
+          "section": "control",
+          "symbols": [
+            "other-devices"
           ],
           "note": "Proposal \u00b7 owner unassigned"
         }
@@ -6658,7 +6903,7 @@
       "items": [
         {
           "id": "protocol-axi",
-          "step": "8",
+          "step": "10",
           "title": "AXI4",
           "description": "High-bandwidth memory and uncached core transactions.",
           "section": "interconnect",
@@ -6667,6 +6912,8 @@
             "hyperram-arbiter",
             "dma",
             "hyperram-bridge",
+            "core-axi-arbiter",
+            "core-slave-bridge",
             "coral-core",
             "core-bridge",
             "core-axi-slave",
@@ -6679,7 +6926,7 @@
         },
         {
           "id": "protocol-tlul",
-          "step": "9",
+          "step": "11",
           "title": "TileLink-UL",
           "description": "Device register access and SoC peripheral interconnect.",
           "section": "interconnect",
@@ -6687,12 +6934,14 @@
             "hyperram-bridge",
             "crossbar",
             "dma",
+            "core-slave-bridge",
             "core-bridge",
             "flash-controller",
             "host-link",
             "uart",
             "control",
             "other-peripherals",
+            "other-devices",
             "dma-tlul-port",
             "dma-config-registers"
           ],
@@ -7033,7 +7282,7 @@
         },
         {
           "id": "owners-interconnect",
-          "step": "20",
+          "step": "22",
           "title": "Interconnect",
           "description": "AXI, TL-UL, bridges, arbiters, and internal fabric.",
           "section": "interconnect",
@@ -7044,6 +7293,8 @@
             "dma-axi-core",
             "dma-tlul-port",
             "core-bridge",
+            "core-axi-arbiter",
+            "core-slave-bridge",
             "crossbar",
             "core-axi-slave",
             "axi-to-fabric",
@@ -7063,7 +7314,7 @@
         },
         {
           "id": "owners-control",
-          "step": "15",
+          "step": "16",
           "title": "Control + peripherals",
           "description": "Reset, boot sources, host link, and peripheral devices.",
           "section": "control",
@@ -7076,6 +7327,7 @@
             "uart",
             "control",
             "other-peripherals",
+            "other-devices",
             "core-debug",
             "scalar-decode",
             "scalar-branch",

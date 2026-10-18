@@ -81,21 +81,24 @@ layouts:
       external-hyperram: {x: 40, y: 80, width: 260, height: 130}
       coral-soc: {x: 340, y: 80, width: 1060, height: 660}
   coral-soc:
-    canvas: {width: 2020, height: 1050}
+    canvas: {width: 2100, height: 1260}
     nodes:
-      external-hyperram: {x: 30, y: 100, width: 260, height: 130}
-      hyperram-controller: {x: 330, y: 100, width: 280, height: 130}
-      hyperram-arbiter: {x: 650, y: 100, width: 260, height: 130}
-      hyperram-bridge: {x: 950, y: 100, width: 400, height: 130}
-      dma: {x: 330, y: 270, width: 720, height: 280}
-      coral-core: {x: 330, y: 590, width: 720, height: 400}
-      core-bridge: {x: 1090, y: 725, width: 280, height: 130}
-      crossbar: {x: 1410, y: 100, width: 260, height: 810}
-      flash-controller: {x: 1710, y: 100, width: 280, height: 130}
-      host-link: {x: 1710, y: 270, width: 280, height: 130}
-      uart: {x: 1710, y: 440, width: 280, height: 130}
-      control: {x: 1710, y: 610, width: 280, height: 130}
-      other-peripherals: {x: 1710, y: 780, width: 280, height: 130}
+      external-hyperram: {x: 30, y: 100, width: 250, height: 130}
+      hyperram-controller: {x: 320, y: 100, width: 270, height: 130}
+      hyperram-arbiter: {x: 630, y: 100, width: 220, height: 130}
+      hyperram-bridge: {x: 890, y: 100, width: 260, height: 130}
+      dma: {x: 320, y: 270, width: 830, height: 230}
+      core-axi-arbiter: {x: 890, y: 540, width: 220, height: 100}
+      core-slave-bridge: {x: 1190, y: 540, width: 250, height: 100}
+      coral-core: {x: 320, y: 680, width: 830, height: 400}
+      core-bridge: {x: 1190, y: 800, width: 250, height: 110}
+      crossbar: {x: 1480, y: 100, width: 220, height: 980}
+      flash-controller: {x: 1760, y: 100, width: 300, height: 130}
+      host-link: {x: 1760, y: 270, width: 300, height: 130}
+      uart: {x: 1760, y: 440, width: 300, height: 130}
+      control: {x: 1760, y: 610, width: 300, height: 130}
+      other-peripherals: {x: 1760, y: 780, width: 300, height: 130}
+      other-devices: {x: 1480, y: 1120, width: 220, height: 110}
   dma:
     canvas: {width: 1510, height: 500}
     nodes:
@@ -235,23 +238,32 @@ ports:
     tlul: {label: TL-UL HOST, protocol: tlul, side: right, offset: 0.5}
   dma:
     hyperram: {label: AXI MASTER · DRAM, protocol: axi, side: top, offset: 0.25}
-    core: {label: AXI MASTER · CORE, protocol: axi, side: bottom, offset: 0.35}
+    core: {label: AXI MASTER · CORE, protocol: axi, side: bottom, offset: 0.75}
     tlul: {label: TL-UL DEVICE, protocol: tlul, side: right, offset: 0.5}
   coral-core:
-    dma: {label: AXI SLAVE, protocol: axi, side: top, offset: 0.25}
+    dma: {label: AXI SLAVE, protocol: axi, side: top, offset: 0.8}
     axi: {label: AXI MASTER, protocol: axi, side: right, offset: 0.55}
+  core-axi-arbiter:
+    dma: {label: AXI SLAVE, protocol: axi, side: top, offset: 0.3}
+    bridge: {label: AXI SLAVE, protocol: axi, side: right, offset: 0.5}
+    core: {label: AXI MASTER, protocol: axi, side: bottom, offset: 0.5}
+  core-slave-bridge:
+    axi: {label: AXI MASTER, protocol: axi, side: left, offset: 0.5}
+    tlul: {label: TL-UL DEVICE, protocol: tlul, side: right, offset: 0.5}
   core-bridge:
     axi: {label: AXI SLAVE, protocol: axi, side: left, offset: 0.55}
     tlul: {label: TL-UL HOST, protocol: tlul, side: right, offset: 0.55}
   crossbar:
-    hyperram: {label: TL-UL HOST, protocol: tlul, side: left, offset: 0.08}
-    dma: {label: TL-UL HOST, protocol: tlul, side: left, offset: 0.395}
-    core: {label: TL-UL HOST, protocol: tlul, side: left, offset: 0.852}
-    flash: {label: TL-UL DEVICE, protocol: tlul, side: right, offset: 0.08}
-    host: {label: TL-UL DEVICE, protocol: tlul, side: right, offset: 0.29}
-    uart: {label: TL-UL DEVICE, protocol: tlul, side: right, offset: 0.5}
-    control: {label: TL-UL DEVICE, protocol: tlul, side: right, offset: 0.71}
-    other: {label: TL-UL DEVICE, protocol: tlul, side: right, offset: 0.92}
+    hyperram: {label: TL-UL HOST, protocol: tlul, side: left, offset: 0.066}
+    dma: {label: TL-UL HOST, protocol: tlul, side: left, offset: 0.29}
+    coreslave: {label: TL-UL HOST, protocol: tlul, side: left, offset: 0.5}
+    core: {label: TL-UL HOST, protocol: tlul, side: left, offset: 0.77}
+    flash: {label: TL-UL DEVICE, protocol: tlul, side: right, offset: 0.066}
+    host: {label: TL-UL DEVICE, protocol: tlul, side: right, offset: 0.24}
+    uart: {label: TL-UL DEVICE, protocol: tlul, side: right, offset: 0.41}
+    control: {label: TL-UL DEVICE, protocol: tlul, side: right, offset: 0.587}
+    other: {label: TL-UL DEVICE, protocol: tlul, side: right, offset: 0.76}
+    expansion: {label: TL-UL DEVICE, protocol: tlul, side: bottom, offset: 0.5}
   flash-controller:
     tlul: {label: TL-UL DEVICE, protocol: tlul, side: left, offset: 0.5}
   host-link:
@@ -262,6 +274,8 @@ ports:
     tlul: {label: TL-UL DEVICE, protocol: tlul, side: left, offset: 0.5}
   other-peripherals:
     tlul: {label: TL-UL DEVICE, protocol: tlul, side: left, offset: 0.5}
+  other-devices:
+    tlul: {label: TL-UL DEVICE, protocol: tlul, side: top, offset: 0.5}
   core-axi-slave:
     fabric: {label: AXI SLAVE, protocol: axi, side: bottom, offset: 0.5}
   axi-to-fabric:
@@ -720,6 +734,39 @@ blocks:
     issues: []
     rtl: []
 
+  - id: core-axi-arbiter
+    name: Core AXI Arbiter
+    kind: arbiter
+    summary: Arbitrates inbound AXI access to Coral Core between the DMA core master and the SoC fabric.
+    parent: coral-soc
+    owner: unassigned
+    maturity: proposal
+    rank: 3
+    order: 2
+    responsibilities:
+      - Select between DMA and fabric requests for the Coral Core AXI slave.
+      - Present a single AXI master to the core boundary.
+    documents:
+      - {title: Original block diagram, path: SoC_arch.png}
+    issues: []
+    rtl: []
+
+  - id: core-slave-bridge
+    name: Core Slave AXI–TL-UL Bridge
+    kind: bridge
+    summary: Adapts inbound TL-UL requests from the crossbar into AXI for the Coral Core arbiter.
+    parent: coral-soc
+    owner: unassigned
+    maturity: proposal
+    rank: 3
+    order: 3
+    responsibilities:
+      - Convert fabric transactions into AXI requests toward Coral Core.
+    documents:
+      - {title: Original block diagram, path: SoC_arch.png}
+    issues: []
+    rtl: []
+
   - id: crossbar
     name: TL-UL Crossbar
     kind: interconnect
@@ -816,6 +863,22 @@ blocks:
     order: 4
     responsibilities:
       - Reserve an explicit expansion seam for future devices.
+    documents:
+      - {title: Original block diagram, path: SoC_arch.png}
+    issues: []
+    rtl: []
+
+  - id: other-devices
+    name: Other Devices
+    kind: peripheral-group
+    summary: Second unnamed device group on the crossbar, drawn below the fabric in the source diagram.
+    parent: coral-soc
+    owner: unassigned
+    maturity: proposal
+    rank: 5
+    order: 5
+    responsibilities:
+      - Reserve the second expansion seam the source diagram records.
     documents:
       - {title: Original block diagram, path: SoC_arch.png}
     issues: []
@@ -1617,7 +1680,10 @@ connections:
   - {id: arbiter-bridge, from: hyperram-arbiter, from_port: bridge, to: hyperram-bridge, to_port: axi, protocol: axi, label: AXI, bidirectional: true}
   - {id: hyperram-fabric, from: hyperram-bridge, from_port: tlul, to: crossbar, to_port: hyperram, protocol: tlul, label: TL-UL, bidirectional: true}
   - {id: dma-fabric, from: dma, from_port: tlul, to: crossbar, to_port: dma, protocol: tlul, label: control + data, bidirectional: true}
-  - {id: dma-core, from: dma, from_port: core, to: coral-core, to_port: dma, protocol: axi, label: TCM access, bidirectional: true}
+  - {id: dma-core, from: dma, from_port: core, to: core-axi-arbiter, to_port: dma, protocol: axi, label: TCM access, bidirectional: true}
+  - {id: fabric-core-slave, from: crossbar, from_port: coreslave, to: core-slave-bridge, to_port: tlul, protocol: tlul, label: inbound TL-UL, bidirectional: true}
+  - {id: core-slave-arbiter, from: core-slave-bridge, from_port: axi, to: core-axi-arbiter, to_port: bridge, protocol: axi, label: inbound AXI, bidirectional: true}
+  - {id: core-arbiter-core, from: core-axi-arbiter, from_port: core, to: coral-core, to_port: dma, protocol: axi, label: arbitrated TCM access, bidirectional: true}
   - {id: core-external, from: coral-core, from_port: axi, to: core-bridge, to_port: axi, protocol: axi, label: uncached requests, bidirectional: true}
   - {id: core-fabric-link, from: core-bridge, from_port: tlul, to: crossbar, to_port: core, protocol: tlul, label: TL-UL, bidirectional: true}
   - {id: flash-fabric, from: crossbar, from_port: flash, to: flash-controller, to_port: tlul, protocol: tlul, label: device port, bidirectional: true}
@@ -1625,6 +1691,7 @@ connections:
   - {id: uart-fabric, from: crossbar, from_port: uart, to: uart, to_port: tlul, protocol: tlul, label: device port, bidirectional: true}
   - {id: control-fabric, from: crossbar, from_port: control, to: control, to_port: tlul, protocol: tlul, label: device port, bidirectional: true}
   - {id: other-fabric, from: crossbar, from_port: other, to: other-peripherals, to_port: tlul, protocol: tlul, label: expansion, bidirectional: true}
+  - {id: other-devices-fabric, from: crossbar, from_port: expansion, to: other-devices, to_port: tlul, protocol: tlul, label: expansion, bidirectional: true}
   - {id: core-slave-convert, from: core-axi-slave, from_port: fabric, to: axi-to-fabric, to_port: axi, protocol: axi, label: inbound AXI, bidirectional: true}
   - {id: core-convert-mux, from: axi-to-fabric, from_port: fabric, to: fabric-mux, to_port: ingress, protocol: fabric, label: inbound fabric, bidirectional: true}
   - {id: core-mux-dtcm, from: fabric-mux, from_port: dtcm, to: dtcm-arbiter, to_port: fabric, protocol: fabric, label: inbound DTCM access, bidirectional: true}
