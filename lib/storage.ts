@@ -1,6 +1,7 @@
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import { GetObjectCommand, PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { isLocalDevelopment } from "@/lib/config";
 
 const localRoot = process.env.ATLAS_LOCAL_UPLOAD_DIR ?? "/tmp/atlas-uploads";
 
@@ -36,7 +37,10 @@ export async function putObject(key: string, bytes: Uint8Array, contentType: str
     );
     return;
   }
-  if (process.env.NODE_ENV === "production") throw new Error("S3-compatible document storage is not configured");
+  // The local-disk fallback is for a developer's machine only. On a host it
+  // would accept an upload, write it to a container filesystem that is
+  // discarded on the next deploy, and report success.
+  if (!isLocalDevelopment()) throw new Error("S3-compatible document storage is not configured");
   const target = path.join(/* turbopackIgnore: true */ localRoot, key);
   if (!target.startsWith(`${localRoot}${path.sep}`)) throw new Error("Invalid storage key");
   await mkdir(path.dirname(target), { recursive: true });
