@@ -78,6 +78,10 @@ template { display: none; }
 .primary-button { min-height: 42px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 0 16px; border: 0; border-radius: 10px; background: var(--ink); color: white; font-size: 12px; font-weight: 700; text-decoration: none; cursor: pointer; }
 .primary-button:hover { background: #283c4a; }
 .surface-loading { min-height: 100%; display: grid; place-items: center; color: var(--muted); font-weight: 700; }
+.surface-empty { min-height: 100%; display: grid; place-content: center; justify-items: center; padding: 40px clamp(20px, 4vw, 58px); text-align: center; background: var(--paper-bright); }.surface-empty > svg { width: 42px; height: 42px; color: var(--muted); }.surface-empty h1 { margin: 18px 0 0; font-size: clamp(30px, 4.4vw, 50px); line-height: .92; letter-spacing: -.035em; text-transform: uppercase; }.surface-empty p { max-width: 58ch; margin: 14px 0 0; color: var(--ink-soft); font-size: 13px; }
+.surface-empty-actions { display: flex; flex-wrap: wrap; justify-content: center; gap: 10px; margin-top: 28px; }
+.secondary-button { min-height: 42px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 0 16px; border: 1px solid var(--ink); border-radius: 10px; background: transparent; color: var(--ink); font-size: 12px; font-weight: 700; text-decoration: none; cursor: pointer; }
+.secondary-button:hover { background: var(--paper); }
 .page-error, .composer-error { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 10px 14px; border: 1px solid #d5a7a3; border-radius: 10px; background: #fff1f0; color: #7a201b; font-size: 12px; }
 .page-error button, .composer-error button { border: 0; background: transparent; color: inherit; font-size: 10px; font-weight: 700; text-transform: uppercase; cursor: pointer; }
 

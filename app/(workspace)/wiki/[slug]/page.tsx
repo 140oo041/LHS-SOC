@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { Icon } from "@/components/icons";
+import { aiIntegrationEnabled } from "@/lib/features";
 import { getWikiPage, listWikiPages } from "@/lib/wiki";
 
 export async function generateStaticParams() {
@@ -31,11 +32,13 @@ export default async function WikiArticlePage({ params }: { params: Promise<{ sl
       </article>
       <aside className="reading-rail">
         <div className="source-stamp"><Icon name="source" /><span><strong>Canonical source</strong><code>{page.relativePath}</code></span></div>
-        <Link className="primary-field-action" href={`/copilot?${askParams}`}>
-          <Icon name="copilot" />
-          <span><strong>Ask about this page</strong><small>Answers stay grounded here</small></span>
-          <Icon name="arrow" />
-        </Link>
+        {aiIntegrationEnabled() && (
+          <Link className="primary-field-action" href={`/copilot?${askParams}`}>
+            <Icon name="copilot" />
+            <span><strong>Ask about this page</strong><small>Answers stay grounded here</small></span>
+            <Icon name="arrow" />
+          </Link>
+        )}
         <section>
           <h2>Related architecture</h2>
           {page.relatedBlocks.length ? page.relatedBlocks.map((block) => (

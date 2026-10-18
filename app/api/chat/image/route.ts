@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { imageProvider } from "@/lib/ai";
 import { requireActor } from "@/lib/authz";
-import { publicErrorMessage } from "@/lib/config";
+import { aiIntegrationEnabled, publicErrorMessage } from "@/lib/config";
 import { appendMessage, createThread, getThread } from "@/lib/repository";
 import { takeRateLimit } from "@/lib/rate-limit";
 
@@ -22,6 +22,9 @@ const schema = z.object({
 });
 
 export async function POST(request: Request) {
+  if (!aiIntegrationEnabled()) {
+    return Response.json({ error: "Atlas has no AI integration yet." }, { status: 503 });
+  }
   const access = await requireActor();
   if (!access.actor) return access.response;
   const limited = takeRateLimit(`image:${access.actor.email}`, 4, 60 * 60_000);

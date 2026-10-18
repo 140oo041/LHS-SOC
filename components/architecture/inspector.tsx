@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useMemo } from "react";
 import { Icon } from "@/components/icons";
+import { aiIntegrationEnabled } from "@/lib/features";
 import type { ViewSnapshot } from "@/lib/model/view";
 import { resolveEvidence } from "./evidence";
 import { MATURITY_COLOR, MATURITY_LABEL, lensHref, type Lens } from "./lens";
@@ -281,11 +282,13 @@ export function Inspector({ snapshot, selectedId, lens, onSelect }: Props) {
           </span>
           <Icon name="arrow" aria-hidden="true" />
         </Link>
-        <Link href={`/copilot?blockId=${encodeURIComponent(block.id)}&blockName=${encodeURIComponent(block.name)}&sourcePath=architecture/soc.yaml`}>
-          <Icon name="copilot" aria-hidden="true" />
-          <span>Ask about this block</span>
-          <Icon name="arrow" aria-hidden="true" />
-        </Link>
+        {aiIntegrationEnabled() && (
+          <Link href={`/copilot?blockId=${encodeURIComponent(block.id)}&blockName=${encodeURIComponent(block.name)}&sourcePath=architecture/soc.yaml`}>
+            <Icon name="copilot" aria-hidden="true" />
+            <span>Ask about this block</span>
+            <Icon name="arrow" aria-hidden="true" />
+          </Link>
+        )}
         <Link href={`/tasks?block=${encodeURIComponent(block.id)}`}>
           <Icon name="tasks" aria-hidden="true" />
           <span>Related work</span>

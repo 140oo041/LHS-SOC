@@ -7,6 +7,8 @@ FROM node:22-alpine AS builder
 WORKDIR /app
 COPY --from=dependencies /app/node_modules ./node_modules
 COPY . .
+# Selects `output: "standalone"` in next.config.ts; see the note there.
+ENV ATLAS_BUILD_TARGET=container
 RUN npm run build
 
 FROM node:22-alpine AS runner

@@ -1,8 +1,11 @@
 import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import {
+  aiIntegrationEnabled,
   configurationErrors,
   demoAuthEnabled,
+  documentStorageConfigured,
   isLocalDevelopment,
+  maxUploadBytes,
   publicErrorMessage,
   secretMatches,
 } from "@/lib/config";
@@ -14,6 +17,13 @@ const GUARDED = [
   "AUTH_GOOGLE_ID",
   "AUTH_GOOGLE_SECRET",
   "ATLAS_ALLOWED_EMAIL_DOMAINS",
+  "ATLAS_ALLOWED_EMAILS",
+  "ATLAS_ADMIN_EMAILS",
+  "ATLAS_EDITOR_EMAILS",
+  "OPENAI_API_KEY",
+  "ATLAS_MAX_UPLOAD_BYTES",
+  "S3_BUCKET",
+  "S3_REGION",
 ] as const;
 
 // NODE_ENV is declared read-only on ProcessEnv, and these tests exist
@@ -84,7 +94,9 @@ describe("the demo actor is opt-in", () => {
 });
 
 describe("upstream error text", () => {
-  const error = new Error("OpenAI request failed (401): Incorrect API key sk-proj-abc123");
+  // Deliberately not shaped like a real credential, so a secret scanner has
+  // no reason to flag this file.
+  const error = new Error("OpenAI request failed (401): Incorrect API key [redacted-example]");
 
   it("never reaches a caller outside local development", () => {
     setEnv({ NODE_ENV: undefined });
@@ -117,47 +129,114 @@ describe("machine secret comparison", () => {
 });
 
 describe("configuration report", () => {
+  const NOTHING_SET = {
+    NODE_ENV: undefined,
+    AUTH_SECRET: undefined,
+    AUTH_GOOGLE_ID: undefined,
+    AUTH_GOOGLE_SECRET: undefined,
+    ATLAS_ALLOWED_EMAIL_DOMAINS: undefined,
+    ATLAS_ALLOWED_EMAILS: undefined,
+    ATLAS_ADMIN_EMAILS: undefined,
+    ATLAS_EDITOR_EMAILS: undefined,
+    ATLAS_DEMO_AUTH: undefined,
+  } as const;
+
+  const CONFIGURED = {
+    ...NOTHING_SET,
+    AUTH_SECRET: "generated-secret",
+    AUTH_GOOGLE_ID: "client-id",
+    AUTH_GOOGLE_SECRET: "client-secret",
+  } as const;
+
   it("names every missing prerequisite for a deployment", () => {
-    setEnv({
-      NODE_ENV: undefined,
-      AUTH_SECRET: undefined,
-      AUTH_GOOGLE_ID: undefined,
-      AUTH_GOOGLE_SECRET: undefined,
-      ATLAS_ALLOWED_EMAIL_DOMAINS: undefined,
-    });
+    setEnv(NOTHING_SET);
     const errors = configurationErrors();
     expect(errors).toHaveLength(3);
     expect(errors.join("\n")).toContain("AUTH_SECRET");
     expect(errors.join("\n")).toContain("identity provider");
-    expect(errors.join("\n")).toContain("ATLAS_ALLOWED_EMAIL_DOMAINS");
+    expect(errors.join("\n")).toContain("ATLAS_ALLOWED_EMAILS");
   });
 
   it("is silent once a deployment is fully configured", () => {
-    setEnv({
-      NODE_ENV: undefined,
-      AUTH_SECRET: "generated-secret",
-      AUTH_GOOGLE_ID: "client-id",
-      AUTH_GOOGLE_SECRET: "client-secret",
-      ATLAS_ALLOWED_EMAIL_DOMAINS: "example.com",
-      ATLAS_DEMO_AUTH: undefined,
-    });
+    setEnv({ ...CONFIGURED, ATLAS_ALLOWED_EMAIL_DOMAINS: "example.com" });
+    expect(configurationErrors()).toEqual([]);
+  });
+
+  it("accepts a named-address allowlist with no domain allowlist", () => {
+    setEnv({ ...CONFIGURED, ATLAS_ALLOWED_EMAILS: "lead@example.com,rtl@other.test" });
+    expect(configurationErrors()).toEqual([]);
+  });
+
+  it("treats naming an admin or editor as admitting them", () => {
+    setEnv({ ...CONFIGURED, ATLAS_ADMIN_EMAILS: "lead@example.com" });
+    expect(configurationErrors()).toEqual([]);
+    setEnv({ ...CONFIGURED, ATLAS_EDITOR_EMAILS: "rtl@example.com" });
     expect(configurationErrors()).toEqual([]);
   });
 
   it("refuses a deployment that leaves the demo actor enabled", () => {
-    setEnv({
-      NODE_ENV: undefined,
-      AUTH_SECRET: "generated-secret",
-      AUTH_GOOGLE_ID: "client-id",
-      AUTH_GOOGLE_SECRET: "client-secret",
-      ATLAS_ALLOWED_EMAIL_DOMAINS: "example.com",
-      ATLAS_DEMO_AUTH: "true",
-    });
+    setEnv({ ...CONFIGURED, ATLAS_ALLOWED_EMAIL_DOMAINS: "example.com", ATLAS_DEMO_AUTH: "true" });
     expect(configurationErrors().join("\n")).toContain("ATLAS_DEMO_AUTH");
   });
 
   it("reports nothing while developing locally", () => {
     setEnv({ NODE_ENV: "development", AUTH_SECRET: undefined });
     expect(configurationErrors()).toEqual([]);
+  });
+});
+
+/**
+ * The integration is off by a constant rather than an environment flag, so a
+ * key arriving in the environment must not be able to switch it on.
+ */
+describe("AI integration", () => {
+  it("is off", () => {
+    expect(aiIntegrationEnabled()).toBe(false);
+  });
+
+  it("stays off when an API key is present", () => {
+    setEnv({ OPENAI_API_KEY: "any-value-at-all" });
+    expect(aiIntegrationEnabled()).toBe(false);
+  });
+
+  it("stays off in local development", () => {
+    setEnv({ NODE_ENV: "development", OPENAI_API_KEY: "any-value-at-all" });
+    expect(aiIntegrationEnabled()).toBe(false);
+  });
+});
+
+describe("document storage", () => {
+  it("is unconfigured on a host with no bucket", () => {
+    setEnv({ NODE_ENV: undefined, S3_BUCKET: undefined, S3_REGION: undefined });
+    expect(documentStorageConfigured()).toBe(false);
+  });
+
+  it("is configured once a bucket and region exist", () => {
+    setEnv({ NODE_ENV: undefined, S3_BUCKET: "atlas-docs", S3_REGION: "us-east-1" });
+    expect(documentStorageConfigured()).toBe(true);
+  });
+
+  it("falls back to local disk only while developing", () => {
+    setEnv({ NODE_ENV: "development", S3_BUCKET: undefined, S3_REGION: undefined });
+    expect(documentStorageConfigured()).toBe(true);
+  });
+});
+
+describe("upload ceiling", () => {
+  it("defaults under the serverless request-body limit", () => {
+    setEnv({ ATLAS_MAX_UPLOAD_BYTES: undefined });
+    expect(maxUploadBytes()).toBe(4 * 1024 * 1024);
+  });
+
+  it("is raisable for a container host", () => {
+    setEnv({ ATLAS_MAX_UPLOAD_BYTES: String(25 * 1024 * 1024) });
+    expect(maxUploadBytes()).toBe(25 * 1024 * 1024);
+  });
+
+  it("ignores a value that is not a positive number", () => {
+    for (const value of ["0", "-5", "lots", ""]) {
+      setEnv({ ATLAS_MAX_UPLOAD_BYTES: value });
+      expect(maxUploadBytes()).toBe(4 * 1024 * 1024);
+    }
   });
 });

@@ -7,9 +7,11 @@ import {
   failKnowledgeRevision,
 } from "@/lib/repository";
 import { currentGitRevision, loadLocalKnowledge } from "@/lib/knowledge";
+import { aiIntegrationEnabled } from "@/lib/config";
 import type { KnowledgeSourceRecord } from "@/lib/domain";
 
 async function openAI(pathname: string, init: RequestInit) {
+  if (!aiIntegrationEnabled()) throw new Error("Atlas has no AI integration, so no request was sent.");
   const response = await fetch(`https://api.openai.com/v1${pathname}`, {
     ...init,
     headers: {
@@ -46,6 +48,7 @@ async function waitForBatch(vectorStoreId: string, batchId: string) {
 }
 
 export async function ingestKnowledge() {
+  if (!aiIntegrationEnabled()) throw new Error("Atlas has no AI integration, so there is nothing to ingest into.");
   if (!process.env.OPENAI_API_KEY) throw new Error("OPENAI_API_KEY is required for ingestion");
   const gitRevision = await currentGitRevision();
   const revision = await beginKnowledgeRevision(gitRevision);

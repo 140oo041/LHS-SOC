@@ -61,12 +61,24 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async signIn({ user, profile }) {
       const email = user.email ?? (typeof profile?.email === "string" ? profile.email : null);
       if (!email) return false;
+      const normalized = email.toLowerCase();
+
+      // Naming someone in any of these lists is a deliberate act of granting
+      // them access, so each one admits as well as assigns a role. Otherwise
+      // adding an admin without also adding them to the allowlist would lock
+      // out the person you just promoted.
+      const allowedEmails = new Set([
+        ...commaList(process.env.ATLAS_ALLOWED_EMAILS),
+        ...commaList(process.env.ATLAS_ADMIN_EMAILS),
+        ...commaList(process.env.ATLAS_EDITOR_EMAILS),
+      ]);
+      if (allowedEmails.has(normalized)) return true;
+
       const allowedDomains = commaList(process.env.ATLAS_ALLOWED_EMAIL_DOMAINS);
-      // No allowlist means no admission decision has been made, which is not
-      // the same as admitting everyone.
+      // An empty allowlist means no admission decision has been made, which
+      // is not the same as admitting everyone.
       if (!allowedDomains.size) return isLocalDevelopment();
-      const domain = email.toLowerCase().split("@")[1];
-      return allowedDomains.has(domain);
+      return allowedDomains.has(normalized.split("@")[1]);
     },
     async jwt({ token, user }) {
       if (user?.email) token.role = roleForEmail(user.email);

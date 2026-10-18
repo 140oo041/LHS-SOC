@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { aiIntegrationEnabled } from "@/lib/config";
 import type { Actor, AtlasContext, Citation } from "@/lib/domain";
 import { latestKnowledgeRevision, findKnowledgeSourceByProviderId } from "@/lib/repository";
 import { searchLocalKnowledge } from "@/lib/knowledge";
@@ -34,10 +35,15 @@ function privacyId(actor: Actor) {
 }
 
 function openAIConfigured() {
-  return Boolean(process.env.OPENAI_API_KEY && process.env.OPENAI_CHAT_MODEL);
+  // aiIntegrationEnabled() is first and decisive: with the integration off, a
+  // key present in the environment must still never produce a request.
+  return aiIntegrationEnabled() && Boolean(process.env.OPENAI_API_KEY && process.env.OPENAI_CHAT_MODEL);
 }
 
 async function openAI(path: string, init: RequestInit) {
+  // Backstop. Every caller is gated already; this makes an ungated future
+  // caller fail here rather than silently spending against a key.
+  if (!aiIntegrationEnabled()) throw new Error("Atlas has no AI integration, so no request was sent.");
   const response = await fetch(`https://api.openai.com/v1${path}`, {
     ...init,
     headers: {
@@ -220,7 +226,7 @@ class OpenAIImageProvider implements ImageProvider {
 
 class UnconfiguredImageProvider implements ImageProvider {
   async generate(): Promise<ImageResult> {
-    throw new Error("Add OPENAI_API_KEY, OPENAI_CHAT_MODEL, and OPENAI_IMAGE_MODEL to enable ephemeral visual explanations.");
+    throw new Error("Atlas has no AI integration, so it cannot generate images.");
   }
 }
 

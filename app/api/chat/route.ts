@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { chatProvider, sse } from "@/lib/ai";
 import { requireActor } from "@/lib/authz";
-import { publicErrorMessage } from "@/lib/config";
+import { aiIntegrationEnabled, publicErrorMessage } from "@/lib/config";
 import { appendMessage, createThread, getThread } from "@/lib/repository";
 import { takeRateLimit } from "@/lib/rate-limit";
 import type { Citation } from "@/lib/domain";
@@ -23,6 +23,9 @@ const requestSchema = z.object({
 });
 
 export async function POST(request: Request) {
+  if (!aiIntegrationEnabled()) {
+    return Response.json({ error: "Atlas has no AI integration yet." }, { status: 503 });
+  }
   const access = await requireActor();
   if (!access.actor) return access.response;
   const limited = takeRateLimit(`chat:${access.actor.email}`, 20, 60_000);

@@ -1,5 +1,5 @@
 import { requireActor } from "@/lib/authz";
-import { publicErrorMessage, secretMatches } from "@/lib/config";
+import { aiIntegrationEnabled, publicErrorMessage, secretMatches } from "@/lib/config";
 import { ingestKnowledge } from "@/lib/ingestion";
 import { latestKnowledgeRevision } from "@/lib/repository";
 
@@ -9,6 +9,9 @@ export const maxDuration = 120;
 export async function GET() {
   const access = await requireActor(["admin"]);
   if (!access.actor) return access.response;
+  if (!aiIntegrationEnabled()) {
+    return Response.json({ error: "Atlas has no AI integration yet." }, { status: 503 });
+  }
   return Response.json({ revision: await latestKnowledgeRevision() });
 }
 
@@ -18,6 +21,9 @@ export async function POST(request: Request) {
   if (!trustedAutomation) {
     const access = await requireActor(["admin"]);
     if (!access.actor) return access.response;
+  }
+  if (!aiIntegrationEnabled()) {
+    return Response.json({ error: "Atlas has no AI integration yet." }, { status: 503 });
   }
   try {
     return Response.json(await ingestKnowledge(), { status: 201 });

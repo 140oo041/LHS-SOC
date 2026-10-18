@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { extname } from "node:path";
 import { requireActor } from "@/lib/authz";
+import { documentStorageConfigured, maxUploadBytes } from "@/lib/config";
 import { createDocument, listDocuments } from "@/lib/repository";
 import { putObject } from "@/lib/storage";
 
@@ -24,11 +25,23 @@ export async function GET() {
 export async function POST(request: Request) {
   const access = await requireActor(["admin", "editor"]);
   if (!access.actor) return access.response;
+  // Checked before reading the body: without object storage the upload would
+  // be accepted and then lost, which is worse than refusing it.
+  if (!documentStorageConfigured()) {
+    return Response.json(
+      { error: "Document storage is not configured, so uploads are disabled." },
+      { status: 503 },
+    );
+  }
   const form = await request.formData();
   const file = form.get("file");
   if (!(file instanceof File)) return Response.json({ error: "Choose a document to upload" }, { status: 400 });
   if (!ALLOWED_TYPES.has(file.type)) return Response.json({ error: "This document type is not allowed" }, { status: 415 });
-  if (file.size > 10 * 1024 * 1024) return Response.json({ error: "Documents must be 10 MB or smaller" }, { status: 413 });
+  const limit = maxUploadBytes();
+  if (file.size > limit) {
+    const megabytes = Math.floor(limit / (1024 * 1024));
+    return Response.json({ error: `Documents must be ${megabytes} MB or smaller` }, { status: 413 });
+  }
   const title = String(form.get("title") || file.name).trim().slice(0, 180);
   const blockIds = String(form.get("blockIds") || "")
     .split(",")

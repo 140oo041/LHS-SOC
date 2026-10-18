@@ -29,6 +29,34 @@ export function demoAuthEnabled() {
   return isLocalDevelopment() && process.env.ATLAS_DEMO_AUTH === "true";
 }
 
+// Lives in lib/features so client components can read it too; re-exported
+// here because the server-side callers already import from this module.
+export { aiIntegrationEnabled } from "@/lib/features";
+
+/**
+ * Whether uploaded documents have somewhere durable to live.
+ *
+ * Mirrors the check in lib/storage so a surface can say storage is missing
+ * instead of failing inside a request.
+ */
+export function documentStorageConfigured() {
+  return Boolean(process.env.S3_BUCKET && process.env.S3_REGION) || isLocalDevelopment();
+}
+
+/**
+ * Largest upload the platform will carry.
+ *
+ * Serverless request bodies are capped well below the 10 MB the document
+ * route used to advertise, and the platform rejects an oversized body before
+ * any of our code runs, which surfaces as an opaque failure. Keeping the
+ * number in one place lets the route and its form agree on it.
+ */
+export function maxUploadBytes() {
+  const configured = Number(process.env.ATLAS_MAX_UPLOAD_BYTES);
+  if (Number.isFinite(configured) && configured > 0) return Math.floor(configured);
+  return 4 * 1024 * 1024;
+}
+
 /**
  * The message a caller is allowed to see when something upstream fails.
  *
@@ -77,8 +105,16 @@ export function configurationErrors(): string[] {
     errors.push("No identity provider is configured. Set the AUTH_GOOGLE_* or AUTH_MICROSOFT_ENTRA_ID_* variables.");
   }
 
-  if (!process.env.ATLAS_ALLOWED_EMAIL_DOMAINS) {
-    errors.push("ATLAS_ALLOWED_EMAIL_DOMAINS is missing, so every sign-in would be refused.");
+  const admits =
+    process.env.ATLAS_ALLOWED_EMAILS ||
+    process.env.ATLAS_ALLOWED_EMAIL_DOMAINS ||
+    process.env.ATLAS_ADMIN_EMAILS ||
+    process.env.ATLAS_EDITOR_EMAILS;
+  if (!admits) {
+    errors.push(
+      "No one is admitted. Set ATLAS_ALLOWED_EMAILS to a comma-separated list of addresses, " +
+        "or ATLAS_ALLOWED_EMAIL_DOMAINS to admit whole domains.",
+    );
   }
 
   if (process.env.ATLAS_DEMO_AUTH === "true") {
