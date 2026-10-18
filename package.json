@@ -7,9 +7,9 @@
     "node": ">=22.0.0"
   },
   "scripts": {
-    "predev": "node scripts/sync-legacy.mjs",
+    "predev": "node scripts/sync-evidence.mjs",
     "dev": "next dev",
-    "prebuild": "node scripts/sync-legacy.mjs",
+    "prebuild": "node scripts/sync-evidence.mjs",
     "build": "next build",
     "start": "next start",
     "db:migrate": "node scripts/migrate.mjs",

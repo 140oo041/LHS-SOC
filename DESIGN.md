@@ -21,35 +21,35 @@ colors:
   danger: "#aa2b24"
 typography:
   display:
-    fontFamily: '"Atlas Ubuntu", Aptos, "Segoe UI", Helvetica, Arial, sans-serif'
+    fontFamily: '"IBM Plex Sans", "Segoe UI", Helvetica, Arial, sans-serif'
     fontSize: "clamp(36px, 5.6vw, 72px)"
-    fontWeight: 800
+    fontWeight: 700
     lineHeight: 0.9
     letterSpacing: "-0.035em"
   headline:
-    fontFamily: '"Atlas Ubuntu", Aptos, "Segoe UI", Helvetica, Arial, sans-serif'
+    fontFamily: '"IBM Plex Sans", "Segoe UI", Helvetica, Arial, sans-serif'
     fontSize: "clamp(25px, 2.8vw, 36px)"
-    fontWeight: 800
+    fontWeight: 700
     lineHeight: 0.98
     letterSpacing: "-0.03em"
   title:
-    fontFamily: '"Atlas Ubuntu", Aptos, "Segoe UI", Helvetica, Arial, sans-serif'
+    fontFamily: '"IBM Plex Sans", "Segoe UI", Helvetica, Arial, sans-serif'
     fontSize: "20px"
-    fontWeight: 800
+    fontWeight: 700
     lineHeight: 1
   body:
-    fontFamily: '"Atlas Ubuntu", Aptos, "Segoe UI", Helvetica, Arial, sans-serif'
+    fontFamily: '"IBM Plex Sans", "Segoe UI", Helvetica, Arial, sans-serif'
     fontSize: "13px"
     fontWeight: 400
     lineHeight: 1.65
   label:
-    fontFamily: '"Atlas Ubuntu", Aptos, "Segoe UI", Helvetica, Arial, sans-serif'
+    fontFamily: '"IBM Plex Sans", "Segoe UI", Helvetica, Arial, sans-serif'
     fontSize: "9px"
-    fontWeight: 800
+    fontWeight: 700
     lineHeight: 1.2
     letterSpacing: "0.08em"
   data:
-    fontFamily: '"SFMono-Regular", Consolas, "Liberation Mono", monospace'
+    fontFamily: '"IBM Plex Mono", ui-monospace, Consolas, "Liberation Mono", monospace'
     fontSize: "9px"
     fontWeight: 600
     lineHeight: 1.4
@@ -159,20 +159,20 @@ The palette reads as blue-gray drafting paper marked with near-black ink. Teal i
 
 ## Typography
 
-**Display Font:** Atlas Ubuntu, with Aptos and Segoe UI fallbacks  
-**Body Font:** Atlas Ubuntu, with Aptos and Segoe UI fallbacks  
-**Data Font:** SFMono-Regular, with Consolas and Liberation Mono fallbacks
+**Display Font:** IBM Plex Sans, with Segoe UI and Helvetica fallbacks  
+**Body Font:** IBM Plex Sans, with Segoe UI and Helvetica fallbacks  
+**Data Font:** IBM Plex Mono, with ui-monospace and Consolas fallbacks
 
-**Character:** One variable sans family gives the system an authored instrument-panel voice. Weight, case, and scale create hierarchy; monospaced text is reserved for stable IDs, repository paths, revisions, counts, timestamps, protocol labels, and shortcuts.
+**Character:** IBM Plex is a technical grotesque drawn for an engineering identity; its even, slightly mechanical letterforms give the system an instrument-panel voice without the softness of a rounded humanist face. Plex Sans and Plex Mono are siblings, so labels and source data share one skeleton. Weight, case, and scale create hierarchy; monospaced text is reserved for stable IDs, repository paths, revisions, counts, timestamps, protocol labels, and shortcuts.
 
 ### Hierarchy
 
-- **Display** (800, `clamp(36px, 5.6vw, 72px)`, 0.9): heavy, tightly tracked, uppercase statements for page identity and purposeful empty states. Keep headings balanced and generally under 14 characters per line.
-- **Headline** (800, `clamp(25px, 2.8vw, 36px)`, 0.98): large uppercase names for the selected architecture context and other signature objects.
-- **Title** (800, 20px, 1): compact uppercase section and surface titles.
+- **Display** (700, `clamp(36px, 5.6vw, 72px)`, 0.9): heavy, tightly tracked, uppercase statements for page identity and purposeful empty states. Keep headings balanced and generally under 14 characters per line.
+- **Headline** (700, `clamp(25px, 2.8vw, 36px)`, 0.98): large uppercase names for the selected architecture context and other signature objects.
+- **Title** (700, 20px, 1): compact uppercase section and surface titles.
 - **Body** (400, 13px, 1.65): sentence case for explanations and technical reading; long-form wiki copy stays near 72 characters per line.
-- **Label** (800, 9px, `0.08em`): small, tracked, usually uppercase wayfinding and metadata keys.
-- **Data** (600, 9px, 1.4): compact monospaced values for source truth and machine-readable identifiers.
+- **Label** (700, 9px, `0.08em`): small, tracked, usually uppercase wayfinding and metadata keys.
+- **Data** (500, 9px, 1.4): compact monospaced values for source truth and machine-readable identifiers.
 
 **The Two-Register Rule.** Use uppercase sans for orientation and mono for evidence; never turn explanatory paragraphs into all caps or render ordinary prose as code.
 

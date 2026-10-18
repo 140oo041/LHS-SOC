@@ -20,7 +20,17 @@ export type IconName =
   | "check"
   | "external"
   | "menu"
-  | "close";
+  | "close"
+  | "chevron"
+  | "zoomIn"
+  | "zoomOut"
+  | "fit"
+  | "lens"
+  | "enter"
+  | "level-up"
+  | "route"
+  | "port"
+  | "sealed";
 
 const paths: Record<IconName, React.ReactNode> = {
   architecture: <><rect x="3" y="4" width="7" height="6" rx="1"/><rect x="14" y="4" width="7" height="6" rx="1"/><rect x="8.5" y="15" width="7" height="5" rx="1"/><path d="M6.5 10v2.5h11V10M12 12.5V15"/></>,
@@ -43,6 +53,16 @@ const paths: Record<IconName, React.ReactNode> = {
   external: <><path d="M14 4h6v6M20 4 10 14"/><path d="M18 13v7H4V6h7"/></>,
   menu: <path d="M4 7h16M4 12h16M4 17h16"/>,
   close: <path d="m5 5 14 14M19 5 5 19"/>,
+  chevron: <path d="m9 6 6 6-6 6"/>,
+  zoomIn: <><circle cx="11" cy="11" r="7"/><path d="M11 8v6M8 11h6M16 16l5 5"/></>,
+  zoomOut: <><circle cx="11" cy="11" r="7"/><path d="M8 11h6M16 16l5 5"/></>,
+  fit: <><path d="M3 9V3h6M21 9V3h-6M3 15v6h6M21 15v6h-6"/></>,
+  lens: <><path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 13 9 5 9-5"/></>,
+  enter: <><path d="M12 4v12"/><path d="m7 11 5 5 5-5"/><path d="M4 20h16"/></>,
+  "level-up": <><path d="M12 20V8"/><path d="m7 13 5-5 5 5"/><path d="M4 4h16"/></>,
+  route: <><circle cx="5" cy="6" r="2"/><circle cx="19" cy="18" r="2"/><path d="M5 8v4a4 4 0 0 0 4 4h8"/></>,
+  port: <><rect x="4" y="9" width="16" height="6" rx="1"/><path d="M8 9V6M16 15v3"/></>,
+  sealed: <><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 4l16 16M20 4 4 20"/></>,
 };
 
 export function Icon({ name, ...props }: { name: IconName } & SVGProps<SVGSVGElement>) {

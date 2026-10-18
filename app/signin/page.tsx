@@ -1,3 +1,4 @@
+import Link from "next/link";
 import Image from "next/image";
 import { redirect } from "next/navigation";
 import { auth, authProviderIds, signIn } from "@/auth";
@@ -31,7 +32,7 @@ export default async function SignInPage() {
             </form>
           )}
           {!authProviderIds.length && !demoAvailable && <p className="inline-error">No identity provider is configured. Ask an Atlas administrator to configure organization SSO.</p>}
-          {demoAvailable && <a className="signin-action demo" href="/architecture">Open local development workspace</a>}
+          {demoAvailable && <Link className="signin-action demo" href="/architecture">Open local development workspace</Link>}
           <small>Access is limited to approved organization domains. Activity may be recorded for security and support.</small>
         </div>
       </section>
