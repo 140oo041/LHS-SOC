@@ -2,11 +2,16 @@ import Link from "next/link";
 import Image from "next/image";
 import { redirect } from "next/navigation";
 import { auth, authProviderIds, signIn } from "@/auth";
+import { configurationErrors, demoAuthEnabled } from "@/lib/config";
 
 export default async function SignInPage() {
   const session = await auth();
   if (session) redirect("/architecture");
-  const demoAvailable = process.env.NODE_ENV !== "production" && process.env.ATLAS_DEMO_AUTH !== "false";
+  const demoAvailable = demoAuthEnabled();
+  // Reasons stay in the server log; the page only admits that sign-in is
+  // unavailable, so a misconfigured deployment is diagnosable without
+  // publishing which variable is missing.
+  const misconfigured = configurationErrors().length > 0;
   return (
     <main className="signin-page">
       <section className="signin-story">
@@ -21,17 +26,23 @@ export default async function SignInPage() {
         <div>
           <h2>Enter Coral SoC</h2>
           <p>Use your organization identity. Atlas does not manage passwords.</p>
-          {authProviderIds.includes("google") && (
+          {misconfigured && (
+            <p className="inline-error">
+              Atlas is not finished being set up, so sign-in is unavailable. An administrator can find the
+              specific cause in the server log.
+            </p>
+          )}
+          {!misconfigured && authProviderIds.includes("google") && (
             <form action={async () => { "use server"; await signIn("google", { redirectTo: "/architecture" }); }}>
               <button className="signin-action" type="submit">Continue with Google</button>
             </form>
           )}
-          {authProviderIds.includes("microsoft-entra-id") && (
+          {!misconfigured && authProviderIds.includes("microsoft-entra-id") && (
             <form action={async () => { "use server"; await signIn("microsoft-entra-id", { redirectTo: "/architecture" }); }}>
               <button className="signin-action" type="submit">Continue with Microsoft</button>
             </form>
           )}
-          {!authProviderIds.length && !demoAvailable && <p className="inline-error">No identity provider is configured. Ask an Atlas administrator to configure organization SSO.</p>}
+          {!misconfigured && !authProviderIds.length && !demoAvailable && <p className="inline-error">No identity provider is configured. Ask an Atlas administrator to configure organization SSO.</p>}
           {demoAvailable && <Link className="signin-action demo" href="/architecture">Open local development workspace</Link>}
           <small>Access is limited to approved organization domains. Activity may be recorded for security and support.</small>
         </div>

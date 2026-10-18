@@ -1,0 +1,110 @@
+import { createHash, timingSafeEqual } from "node:crypto";
+
+/**
+ * Deployment posture, and the single place that decides it.
+ *
+ * Every development convenience in Atlas used to be written as
+ * `process.env.NODE_ENV !== "production"`. That reads as "be strict in
+ * production", but it is really "be permissive unless this exact string
+ * matches", and it fails *open*: an unset, misspelled, or host-overridden
+ * NODE_ENV simultaneously enabled the anonymous admin actor, signed sessions
+ * with a secret committed to this repository, accepted every email domain, and
+ * returned raw upstream error text to the browser.
+ *
+ * So the polarity is inverted here. `next dev` is the only thing that sets
+ * NODE_ENV to "development", and a hardened posture is the default for
+ * everything else — including a blank environment.
+ */
+export function isLocalDevelopment() {
+  return process.env.NODE_ENV === "development";
+}
+
+/**
+ * The unauthenticated admin actor used while developing against no IdP.
+ *
+ * Opt-in, not opt-out. The old `!== "false"` test meant that forgetting the
+ * variable granted the backdoor; now forgetting it closes the backdoor.
+ */
+export function demoAuthEnabled() {
+  return isLocalDevelopment() && process.env.ATLAS_DEMO_AUTH === "true";
+}
+
+/**
+ * The message a caller is allowed to see when something upstream fails.
+ *
+ * Upstream text can carry request URLs, model names, quota details, and
+ * occasionally fragments of the prompt, so it stays in the server log and only
+ * reaches a browser on a developer's own machine.
+ */
+export function publicErrorMessage(error: unknown, fallback: string) {
+  if (isLocalDevelopment()) return error instanceof Error ? error.message : fallback;
+  return fallback;
+}
+
+/**
+ * Constant-time shared-secret check for machine callers.
+ *
+ * Compares SHA-256 digests rather than the raw strings: `timingSafeEqual`
+ * throws on a length mismatch, and the digest keeps both sides at 32 bytes so
+ * the secret's length does not leak through that throw.
+ */
+export function secretMatches(provided: string | null | undefined, expected: string | undefined) {
+  if (!provided || !expected) return false;
+  const a = createHash("sha256").update(provided).digest();
+  const b = createHash("sha256").update(expected).digest();
+  return timingSafeEqual(a, b);
+}
+
+/**
+ * Configuration that a reachable deployment must have, checked at request
+ * time rather than at import time so a build never depends on runtime secrets.
+ */
+export function configurationErrors(): string[] {
+  if (isLocalDevelopment()) return [];
+  const errors: string[] = [];
+
+  if (!process.env.AUTH_SECRET) {
+    errors.push("AUTH_SECRET is missing. Generate one with `openssl rand -base64 32`.");
+  }
+
+  const hasGoogle = Boolean(process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET);
+  const hasEntra = Boolean(
+    process.env.AUTH_MICROSOFT_ENTRA_ID_ID &&
+      process.env.AUTH_MICROSOFT_ENTRA_ID_SECRET &&
+      process.env.AUTH_MICROSOFT_ENTRA_ID_ISSUER,
+  );
+  if (!hasGoogle && !hasEntra) {
+    errors.push("No identity provider is configured. Set the AUTH_GOOGLE_* or AUTH_MICROSOFT_ENTRA_ID_* variables.");
+  }
+
+  if (!process.env.ATLAS_ALLOWED_EMAIL_DOMAINS) {
+    errors.push("ATLAS_ALLOWED_EMAIL_DOMAINS is missing, so every sign-in would be refused.");
+  }
+
+  if (process.env.ATLAS_DEMO_AUTH === "true") {
+    errors.push("ATLAS_DEMO_AUTH=true is set outside local development. Remove it.");
+  }
+
+  return errors;
+}
+
+let warned = false;
+
+/**
+ * True when the deployment is not safe to serve. Logs the reasons once.
+ *
+ * Callers deny access on a true result: a misconfigured Atlas locks everyone
+ * out and says why in the log, instead of letting anyone in as an admin.
+ */
+export function deploymentIsMisconfigured() {
+  const errors = configurationErrors();
+  if (!errors.length) return false;
+  if (!warned) {
+    warned = true;
+    console.error(
+      `Atlas refused to serve authenticated requests because of ${errors.length} configuration problem(s):\n` +
+        errors.map((error) => `  - ${error}`).join("\n"),
+    );
+  }
+  return true;
+}

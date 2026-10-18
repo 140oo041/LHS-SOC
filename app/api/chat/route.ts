@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { chatProvider, sse } from "@/lib/ai";
 import { requireActor } from "@/lib/authz";
+import { publicErrorMessage } from "@/lib/config";
 import { appendMessage, createThread, getThread } from "@/lib/repository";
 import { takeRateLimit } from "@/lib/rate-limit";
 import type { Citation } from "@/lib/domain";
@@ -65,8 +66,8 @@ export async function POST(request: Request) {
         await appendMessage(access.actor!, thread.id, { role: "assistant", content: answer, citations });
         controller.enqueue(sse("done", { threadId: thread.id }));
       } catch (error) {
-        const message = error instanceof Error ? error.message : "Atlas could not complete this answer.";
-        controller.enqueue(sse("error", { message: process.env.NODE_ENV === "production" ? "Atlas could not complete this answer." : message }));
+        console.error("Atlas chat stream failed", error);
+        controller.enqueue(sse("error", { message: publicErrorMessage(error, "Atlas could not complete this answer.") }));
       } finally {
         controller.close();
       }

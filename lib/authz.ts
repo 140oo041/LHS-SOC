@@ -1,7 +1,12 @@
 import { auth } from "@/auth";
+import { demoAuthEnabled, deploymentIsMisconfigured } from "@/lib/config";
 import type { Actor, Role } from "@/lib/domain";
 
 export async function currentActor(): Promise<Actor | null> {
+  // A deployment missing its secret, its provider, or its domain allowlist
+  // denies everyone rather than falling through to the demo actor below.
+  if (deploymentIsMisconfigured()) return null;
+
   const session = await auth();
   if (session?.user?.email) {
     return {
@@ -12,9 +17,7 @@ export async function currentActor(): Promise<Actor | null> {
     };
   }
 
-  const demoEnabled =
-    process.env.NODE_ENV !== "production" && process.env.ATLAS_DEMO_AUTH !== "false";
-  if (!demoEnabled) return null;
+  if (!demoAuthEnabled()) return null;
 
   return {
     email: "architect@atlas.local",

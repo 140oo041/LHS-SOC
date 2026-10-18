@@ -1,4 +1,5 @@
 import { requireActor } from "@/lib/authz";
+import { publicErrorMessage, secretMatches } from "@/lib/config";
 import { ingestKnowledge } from "@/lib/ingestion";
 import { latestKnowledgeRevision } from "@/lib/repository";
 
@@ -13,7 +14,7 @@ export async function GET() {
 
 export async function POST(request: Request) {
   const secret = request.headers.get("x-atlas-ingestion-secret");
-  const trustedAutomation = Boolean(process.env.ATLAS_INGESTION_SECRET && secret === process.env.ATLAS_INGESTION_SECRET);
+  const trustedAutomation = secretMatches(secret, process.env.ATLAS_INGESTION_SECRET);
   if (!trustedAutomation) {
     const access = await requireActor(["admin"]);
     if (!access.actor) return access.response;
@@ -21,7 +22,7 @@ export async function POST(request: Request) {
   try {
     return Response.json(await ingestKnowledge(), { status: 201 });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Ingestion failed";
-    return Response.json({ error: process.env.NODE_ENV === "production" ? "Ingestion failed" : message }, { status: 502 });
+    console.error("Atlas knowledge ingestion failed", error);
+    return Response.json({ error: publicErrorMessage(error, "Ingestion failed") }, { status: 502 });
   }
 }

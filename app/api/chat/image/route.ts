@@ -1,6 +1,7 @@
 import { z } from "zod";
 import { imageProvider } from "@/lib/ai";
 import { requireActor } from "@/lib/authz";
+import { publicErrorMessage } from "@/lib/config";
 import { appendMessage, createThread, getThread } from "@/lib/repository";
 import { takeRateLimit } from "@/lib/rate-limit";
 
@@ -45,7 +46,7 @@ export async function POST(request: Request) {
     });
     return Response.json({ ...image, threadId: thread.id, ephemeral: true });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Atlas could not generate this image.";
-    return Response.json({ error: process.env.NODE_ENV === "production" ? "Atlas could not generate this image." : message }, { status: 422 });
+    console.error("Atlas image generation failed", error);
+    return Response.json({ error: publicErrorMessage(error, "Atlas could not generate this image.") }, { status: 422 });
   }
 }

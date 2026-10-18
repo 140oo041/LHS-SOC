@@ -1,6 +1,7 @@
 import NextAuth, { type NextAuthConfig } from "next-auth";
 import Google from "next-auth/providers/google";
 import MicrosoftEntraID from "next-auth/providers/microsoft-entra-id";
+import { isLocalDevelopment } from "@/lib/config";
 import type { Role } from "@/lib/domain";
 
 const providers: NextAuthConfig["providers"] = [];
@@ -49,9 +50,10 @@ export const authProviderIds = providers.map((provider) =>
 );
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
-  secret:
-    process.env.AUTH_SECRET ??
-    (process.env.NODE_ENV !== "production" ? "atlas-development-only-secret" : undefined),
+  // The fallback is a literal in a public repository, so it may only ever sign
+  // sessions on a developer's own machine. Anywhere else, a missing
+  // AUTH_SECRET leaves this undefined and lib/config reports it.
+  secret: process.env.AUTH_SECRET ?? (isLocalDevelopment() ? "atlas-development-only-secret" : undefined),
   providers,
   pages: { signIn: "/signin" },
   session: { strategy: "jwt", maxAge: 8 * 60 * 60 },
@@ -60,7 +62,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       const email = user.email ?? (typeof profile?.email === "string" ? profile.email : null);
       if (!email) return false;
       const allowedDomains = commaList(process.env.ATLAS_ALLOWED_EMAIL_DOMAINS);
-      if (!allowedDomains.size) return process.env.NODE_ENV !== "production";
+      // No allowlist means no admission decision has been made, which is not
+      // the same as admitting everyone.
+      if (!allowedDomains.size) return isLocalDevelopment();
       const domain = email.toLowerCase().split("@")[1];
       return allowedDomains.has(domain);
     },
