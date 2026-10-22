@@ -4,8 +4,12 @@ import Link from "next/link";
 import { useMemo } from "react";
 import { Icon } from "@/components/icons";
 import { aiIntegrationEnabled } from "@/lib/features";
+import type { FieldChange } from "@/lib/model/diff";
 import type { ViewSnapshot } from "@/lib/model/view";
 import { resolveEvidence } from "./evidence";
+import type { ModelEditContext } from "./explorer";
+import { BlockEditor, ConnectionEditor, StartBranch } from "./model-editor";
+import type { ModelSession } from "./model-session";
 import { MATURITY_COLOR, MATURITY_LABEL, lensHref, type Lens } from "./lens";
 
 type Props = {
@@ -13,7 +17,42 @@ type Props = {
   selectedId: string | null;
   lens: Lens;
   onSelect(blockId: string): void;
+  versionQuery?: string;
+  editing?: ModelEditContext | null;
+  /** Present when the viewer can change the model on this branch. */
+  session?: ModelSession | null;
+  showChanges?: boolean;
 };
+
+const FIELD_LABEL: Record<string, string> = { responsibilities: "Responsibilities", maturity: "Maturity", owner: "Owner", summary: "Summary", name: "Name", kind: "Kind", parent: "Parent", position: "Position on canvas", interfaces: "Interfaces" };
+
+function showValue(value: unknown) {
+  if (Array.isArray(value)) return value.length ? value.map((item) => (typeof item === "string" ? item : JSON.stringify(item))).join("; ") : "none";
+  if (value === null || value === undefined) return "none";
+  return typeof value === "string" ? value : JSON.stringify(value);
+}
+
+/** What the branch did to this block, shown above its record. */
+function BlockChange({ status, fields }: { status: "added" | "removed" | "changed"; fields: FieldChange[] }) {
+  if (status === "added") return <p className="inspector-change added">Added on this branch.</p>;
+  if (status === "removed") return <p className="inspector-change removed">Removed on this branch. Shown where it was so the change can be reviewed.</p>;
+  return (
+    <div className="inspector-change changed">
+      <p>Changed on this branch</p>
+      <dl>
+        {fields.map((change) => (
+          <div key={change.field}>
+            <dt>{FIELD_LABEL[change.field] ?? change.field}</dt>
+            <dd>
+              <del>{showValue(change.before)}</del>
+              <ins>{showValue(change.after)}</ins>
+            </dd>
+          </div>
+        ))}
+      </dl>
+    </div>
+  );
+}
 
 /**
  * The single inspector.
@@ -23,7 +62,7 @@ type Props = {
  * clipped inside an overflow-hidden iframe. This one reads the real model and
  * is the only one.
  */
-export function Inspector({ snapshot, selectedId, lens, onSelect }: Props) {
+export function Inspector({ snapshot, selectedId, lens, onSelect, versionQuery = "", editing = null, session = null, showChanges = false }: Props) {
   const block = selectedId ? snapshot.blocks[selectedId] : null;
 
   const edges = useMemo(() => {
@@ -93,6 +132,9 @@ export function Inspector({ snapshot, selectedId, lens, onSelect }: Props) {
     );
   }
 
+  const changes = showChanges ? snapshot.changes : undefined;
+  const status = snapshot.changes?.blocks[block.id];
+  const editable = status !== "removed";
   const ports = snapshot.ports[block.id] ?? [];
   const parent = block.parent ? snapshot.blocks[block.parent] : null;
   const children = block.childIds.map((id) => snapshot.blocks[id]).filter(Boolean);
@@ -114,17 +156,25 @@ export function Inspector({ snapshot, selectedId, lens, onSelect }: Props) {
         <code className="identity-id">{block.id}</code>
       </header>
 
+      {status && (changes || status === "removed") && <BlockChange status={status} fields={snapshot.changes?.fields[block.id] ?? []} />}
+      {editable && editing?.onDefault && <StartBranch block={block} editing={editing} />}
+      {editable && session && <BlockEditor snapshot={snapshot} block={block} session={session} />}
+
       <section className="inspector-block">
-        <p className="inspector-summary">{block.summary}</p>
+        {block.summary ? <p className="inspector-summary">{block.summary}</p> : <p className="inspector-absent">No summary yet.</p>}
       </section>
 
       <section className="inspector-block">
         <h3>Responsibilities</h3>
-        <ul className="plain-list">
-          {block.responsibilities.map((item) => (
-            <li key={item}>{item}</li>
-          ))}
-        </ul>
+        {block.responsibilities.length ? (
+          <ul className="plain-list">
+            {block.responsibilities.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        ) : (
+          <p className="inspector-absent">None recorded yet.</p>
+        )}
       </section>
 
       <section className="inspector-block">
@@ -160,7 +210,7 @@ export function Inspector({ snapshot, selectedId, lens, onSelect }: Props) {
         ) : (
           <ul className="edge-list">
             {edges.map(({ connection, peer, direction, color }) => (
-              <li key={connection.id}>
+              <li key={connection.id} className={changes?.connections[connection.id] ? `diff-${changes.connections[connection.id]}` : undefined}>
                 <button type="button" onClick={() => onSelect(peer.id)}>
                   <span className="edge-swatch" style={{ background: color }} aria-hidden="true" />
                   <span className="edge-direction">{direction === "outbound" ? "to" : "from"}</span>
@@ -168,6 +218,9 @@ export function Inspector({ snapshot, selectedId, lens, onSelect }: Props) {
                   <span className="edge-caption">{connection.label}</span>
                   <Icon name="arrow" aria-hidden="true" />
                 </button>
+                {editable && session && snapshot.changes?.connections[connection.id] !== "removed" && (
+                  <ConnectionEditor key={connection.id} connection={connection} session={session} />
+                )}
               </li>
             ))}
           </ul>
@@ -320,7 +373,7 @@ export function Inspector({ snapshot, selectedId, lens, onSelect }: Props) {
         </dl>
         <p className="inspector-authority">
           Generated explanations stay secondary to this cited Git source.{" "}
-          <Link href={lensHref(block.id, lens)}>Permalink</Link>
+          <Link href={lensHref(block.id, lens, versionQuery)}>Permalink</Link>
         </p>
       </footer>
     </aside>

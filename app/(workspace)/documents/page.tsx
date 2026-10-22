@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { currentActor } from "@/lib/authz";
+import { maxDirectUploadBytes } from "@/lib/config";
 import { hasDatabase } from "@/lib/db";
-import { listDocuments } from "@/lib/repository";
+import { canAdmin, canEdit } from "@/lib/domain";
+import { listDocuments } from "@/lib/documents";
 import { listWikiPages } from "@/lib/wiki";
 import { DocumentLibrary } from "@/components/document-library";
 
@@ -13,12 +15,16 @@ const NO_STORAGE =
 
 export default async function DocumentsPage() {
   const actor = await currentActor();
-  const [documents, wiki] = await Promise.all([listDocuments(), listWikiPages()]);
+  const editor = actor ? canEdit(actor.role) : false;
+  // Editors also receive archived documents so they can restore them.
+  const [documents, wiki] = await Promise.all([listDocuments({ includeArchived: editor }), listWikiPages()]);
   return (
     <DocumentLibrary
       initialDocuments={documents}
       wiki={wiki.map(({ slug, title, relativePath, summary, relatedBlocks }) => ({ slug, title, relativePath, summary, relatedBlocks }))}
-      canEdit={actor?.role === "admin" || actor?.role === "editor"}
+      canEdit={editor}
+      canAdmin={actor ? canAdmin(actor.role) : false}
+      maxBytes={maxDirectUploadBytes()}
       notice={hasDatabase() ? undefined : NO_STORAGE}
     />
   );

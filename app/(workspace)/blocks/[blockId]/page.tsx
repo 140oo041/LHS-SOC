@@ -4,11 +4,12 @@ import { notFound } from "next/navigation";
 import { Icon } from "@/components/icons";
 import { resolveEvidence } from "@/components/architecture/evidence";
 import { MATURITY_COLOR, MATURITY_LABEL } from "@/components/architecture/lens";
-import { graph } from "@/lib/model/graph";
-import { listDocuments, listTasks } from "@/lib/repository";
+import { publishedModel } from "@/lib/model/at";
+import { listDocuments } from "@/lib/documents";
+import { listTasks } from "@/lib/repository";
 
 export async function generateMetadata({ params }: { params: Promise<{ blockId: string }> }): Promise<Metadata> {
-  const block = graph().blockById.get(decodeURIComponent((await params).blockId));
+  const block = (await publishedModel()).graph.blockById.get(decodeURIComponent((await params).blockId));
   return { title: block ? `${block.name} · Block record` : "Block record" };
 }
 
@@ -21,7 +22,7 @@ export async function generateMetadata({ params }: { params: Promise<{ blockId: 
  */
 export default async function BlockRecordPage({ params }: { params: Promise<{ blockId: string }> }) {
   const blockId = decodeURIComponent((await params).blockId);
-  const g = graph();
+  const g = (await publishedModel()).graph;
   const block = g.blockById.get(blockId);
   if (!block) notFound();
 

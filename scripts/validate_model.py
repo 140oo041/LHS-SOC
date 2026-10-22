@@ -80,8 +80,8 @@ def validate(model: dict[str, Any], root: Path) -> list[str]:
         for field in ("rank", "order"):
             if not isinstance(block.get(field), int) or block[field] < 0:
                 errors.append(f"{label}.{field}: expected a non-negative integer")
-        if not isinstance(block.get("responsibilities"), list) or not block.get("responsibilities"):
-            errors.append(f"{label}.responsibilities: expected at least one responsibility")
+        if not isinstance(block.get("responsibilities"), list):
+            errors.append(f"{label}.responsibilities: expected a list")
         for doc_index, document in enumerate(block.get("documents", [])):
             if not isinstance(document, dict) or not document.get("title"):
                 errors.append(f"{label}.documents[{doc_index}]: expected a titled document mapping")

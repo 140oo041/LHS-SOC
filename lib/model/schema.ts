@@ -43,7 +43,7 @@ const blockSchema = z.object({
   maturity: z.enum(MATURITY),
   rank: z.number().int().nonnegative(),
   order: z.number().int().nonnegative(),
-  responsibilities: z.array(z.string()).min(1),
+  responsibilities: z.array(z.string()),
   documents: z.array(documentSchema),
   issues: z.array(issueSchema),
   rtl: z.array(rtlSchema),

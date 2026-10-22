@@ -1,12 +1,13 @@
 import { z } from "zod";
 import { imageProvider } from "@/lib/ai";
 import { requireActor } from "@/lib/authz";
-import { aiIntegrationEnabled, publicErrorMessage } from "@/lib/config";
+import { recordAiUsage, reserveAiRequest } from "@/lib/ai-budget";
+import { aiOperational, publicErrorMessage } from "@/lib/config";
 import { appendMessage, createThread, getThread } from "@/lib/repository";
 import { takeRateLimit } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
-export const maxDuration = 90;
+export const maxDuration = 60;
 
 const schema = z.object({
   prompt: z.string().trim().min(3).max(2_000),
@@ -22,13 +23,15 @@ const schema = z.object({
 });
 
 export async function POST(request: Request) {
-  if (!aiIntegrationEnabled()) {
+  // Images have no free fallback, so the route is closed until spend is bounded.
+  if (!aiOperational()) {
     return Response.json({ error: "Atlas has no AI integration yet." }, { status: 503 });
   }
   const access = await requireActor();
   if (!access.actor) return access.response;
-  const limited = takeRateLimit(`image:${access.actor.email}`, 4, 60 * 60_000);
+  const limited = await takeRateLimit(`image:${access.actor.email}`, 4, 60 * 60_000);
   if (!limited.allowed) return Response.json({ error: "Image generation limit reached. Try again later." }, { status: 429 });
+  if (!(await reserveAiRequest())) return Response.json({ error: "This month's AI budget is used up. Ask an administrator." }, { status: 429 });
   const parsed = schema.safeParse(await request.json().catch(() => null));
   if (!parsed.success) return Response.json({ error: "Enter a valid visual explanation request." }, { status: 400 });
   const existing = parsed.data.threadId ? await getThread(access.actor, parsed.data.threadId) : null;
@@ -36,6 +39,7 @@ export async function POST(request: Request) {
   const thread = existing ?? (await createThread(access.actor, parsed.data.prompt, parsed.data.context));
   try {
     const image = await imageProvider().generate({ actor: access.actor, prompt: parsed.data.prompt, context: parsed.data.context });
+    if (image.usage) await recordAiUsage("image", access.actor.email, image.usage).catch((error) => console.error("Could not record AI usage", error));
     await appendMessage(access.actor, thread.id, {
       role: "user",
       content: parsed.data.prompt,

@@ -1,5 +1,6 @@
-import { graph } from "./graph";
-import type { Maturity, Side } from "./schema";
+import { buildGraph, graph, type ArchitectureGraph } from "./graph";
+import type { SnapshotChanges } from "./diff";
+import type { ArchitectureModel, Maturity, Side } from "./schema";
 
 /**
  * The serialisable slice of the architecture model handed to the client.
@@ -71,13 +72,23 @@ export type ViewSnapshot = {
     unassigned: number;
     withoutRtl: number;
   };
+  /** Set when the snapshot shows a branch's changes against where it started. */
+  changes?: SnapshotChanges;
 };
 
 let cached: ViewSnapshot | null = null;
 
+/** The snapshot of the model bundled with this deployment. */
 export function viewSnapshot(): ViewSnapshot {
-  if (cached) return cached;
-  const g = graph();
+  cached ??= buildSnapshot(graph());
+  return cached;
+}
+
+export function snapshotOf(model: ArchitectureModel): ViewSnapshot {
+  return buildSnapshot(buildGraph(model));
+}
+
+export function buildSnapshot(g: ArchitectureGraph): ViewSnapshot {
   const m = g.model;
 
   const blocks: Record<string, ViewBlock> = {};
@@ -124,7 +135,7 @@ export function viewSnapshot(): ViewSnapshot {
     };
   }
 
-  cached = {
+  return {
     product: { name: m.product.name, description: m.product.description, defaultFocus: m.product.default_focus },
     protocols: m.protocols,
     owners: Object.fromEntries(m.owners.map((owner) => [owner.id, owner.name])),
@@ -180,5 +191,4 @@ export function viewSnapshot(): ViewSnapshot {
       withoutRtl: g.counts.withoutRtl,
     },
   };
-  return cached;
 }

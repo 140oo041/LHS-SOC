@@ -1,18 +1,22 @@
 import { createHash } from "node:crypto";
-import { aiIntegrationEnabled } from "@/lib/config";
+import { aiOperational } from "@/lib/config";
+import type { AiUsage } from "@/lib/ai-budget";
 import type { Actor, AtlasContext, Citation } from "@/lib/domain";
-import { latestKnowledgeRevision, findKnowledgeSourceByProviderId } from "@/lib/repository";
+import { latestReadyKnowledgeRevision, findKnowledgeSourceByProviderId } from "@/lib/repository";
 import { searchLocalKnowledge } from "@/lib/knowledge";
 
 export type ChatStreamEvent =
   | { type: "delta"; text: string }
   | { type: "citations"; citations: Citation[] }
+  /** What a paid answer consumed, for the monthly budget. */
+  | { type: "usage"; usage: AiUsage }
   | { type: "done"; text: string; citations: Citation[] };
 
 export type ImageResult = {
   mimeType: "image/png" | "image/webp" | "image/jpeg";
   base64: string;
   revisedPrompt?: string;
+  usage?: AiUsage;
 };
 
 export interface ChatProvider {
@@ -35,15 +39,15 @@ function privacyId(actor: Actor) {
 }
 
 function openAIConfigured() {
-  // aiIntegrationEnabled() is first and decisive: with the integration off, a
-  // key present in the environment must still never produce a request.
-  return aiIntegrationEnabled() && Boolean(process.env.OPENAI_API_KEY && process.env.OPENAI_CHAT_MODEL);
+  // With the integration off, or on without bounded spend, a key present in
+  // the environment must still never produce a request.
+  return aiOperational();
 }
 
 async function openAI(path: string, init: RequestInit) {
   // Backstop. Every caller is gated already; this makes an ungated future
   // caller fail here rather than silently spending against a key.
-  if (!aiIntegrationEnabled()) throw new Error("Atlas has no AI integration, so no request was sent.");
+  if (!aiOperational()) throw new Error("Atlas has no AI integration, so no request was sent.");
   const response = await fetch(`https://api.openai.com/v1${path}`, {
     ...init,
     headers: {
@@ -92,8 +96,8 @@ class OpenAIResponsesProvider implements ChatProvider {
     context: AtlasContext;
     history: Array<{ role: "user" | "assistant"; content: string }>;
   }): AsyncGenerator<ChatStreamEvent> {
-    const revision = await latestKnowledgeRevision();
-    const vectorStoreId = revision?.status === "ready" ? revision.vectorStoreId : process.env.OPENAI_VECTOR_STORE_ID;
+    const revision = await latestReadyKnowledgeRevision();
+    const vectorStoreId = revision?.vectorStoreId ?? process.env.OPENAI_VECTOR_STORE_ID;
     if (!vectorStoreId) {
       yield* new LocalEvidenceProvider().stream(input);
       return;
@@ -158,7 +162,18 @@ class OpenAIResponsesProvider implements ChatProvider {
           yield { type: "delta", text: event.delta };
         }
         if (event.type === "response.completed") {
-          const completed = event.response as { output?: Array<Record<string, unknown>> } | undefined;
+          const completed = event.response as
+            | { output?: Array<Record<string, unknown>>; usage?: { input_tokens?: number; output_tokens?: number } }
+            | undefined;
+          yield {
+            type: "usage",
+            usage: {
+              model: process.env.OPENAI_CHAT_MODEL,
+              inputTokens: completed?.usage?.input_tokens,
+              outputTokens: completed?.usage?.output_tokens,
+              toolCalls: (completed?.output ?? []).filter((item) => item.type === "file_search_call").length,
+            },
+          };
           const annotations = (completed?.output ?? [])
             .filter((item) => item.type === "message")
             .flatMap((item) => (item.content as Array<Record<string, unknown>> | undefined) ?? [])
@@ -216,11 +231,17 @@ class OpenAIImageProvider implements ImageProvider {
     });
     const payload = (await response.json()) as {
       output?: Array<{ type: string; result?: string; revised_prompt?: string; output_format?: string }>;
+      usage?: { input_tokens?: number; output_tokens?: number };
     };
     const call = payload.output?.find((item) => item.type === "image_generation_call");
     if (!call?.result) throw new Error("Image generation completed without an image");
     const mime = call.output_format === "png" ? "image/png" : call.output_format === "jpeg" ? "image/jpeg" : "image/webp";
-    return { mimeType: mime, base64: call.result, revisedPrompt: call.revised_prompt };
+    return {
+      mimeType: mime,
+      base64: call.result,
+      revisedPrompt: call.revised_prompt,
+      usage: { model: process.env.OPENAI_CHAT_MODEL, inputTokens: payload.usage?.input_tokens, outputTokens: payload.usage?.output_tokens, images: 1 },
+    };
   }
 }
 
@@ -228,6 +249,11 @@ class UnconfiguredImageProvider implements ImageProvider {
   async generate(): Promise<ImageResult> {
     throw new Error("Atlas has no AI integration, so it cannot generate images.");
   }
+}
+
+/** Whether chatProvider() will spend money, so callers know to reserve budget. */
+export function chatIsPaid() {
+  return openAIConfigured();
 }
 
 export function chatProvider(): ChatProvider {

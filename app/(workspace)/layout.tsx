@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation";
 import { AppShell } from "@/components/app-shell";
 import { currentActor, isPublicVisitor } from "@/lib/authz";
-import { signInAvailable } from "@/lib/config";
+import { demoAuthEnabled, signInAvailable } from "@/lib/config";
+import { DEMO_ACCOUNTS } from "@/lib/demo-accounts";
 
 /**
  * Every page under this layout depends on who is asking, so none of them may
@@ -20,7 +21,7 @@ export default async function WorkspaceLayout({ children }: { children: React.Re
   const actor = await currentActor();
   if (!actor) redirect("/signin");
   return (
-    <AppShell actor={actor} anonymous={isPublicVisitor(actor)} canSignIn={signInAvailable()}>
+    <AppShell actor={actor} anonymous={isPublicVisitor(actor)} canSignIn={signInAvailable()} demoAccounts={demoAuthEnabled() ? DEMO_ACCOUNTS : null}>
       {children}
     </AppShell>
   );

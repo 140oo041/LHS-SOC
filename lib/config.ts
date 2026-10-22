@@ -1,4 +1,7 @@
 import { createHash, timingSafeEqual } from "node:crypto";
+import { githubConfigurationErrors } from "@/lib/content/github-app";
+import { aiIntegrationEnabled } from "@/lib/features";
+import { insecureSslReason } from "@/scripts/ssl-config.mjs";
 
 /**
  * Deployment posture, and the single place that decides it.
@@ -69,6 +72,34 @@ export function signInAvailable() {
 export { aiIntegrationEnabled } from "@/lib/features";
 
 /**
+ * What still stands between the AI switch and a paid request.
+ *
+ * Turning on the constant in lib/features is necessary but not sufficient:
+ * spend must also be bounded. The rate limiter and the monthly budget only
+ * hold across serverless instances when they live in the database, and the
+ * budget needs prices to estimate against. Until every item here is met,
+ * Atlas answers from its local evidence search and sends nothing.
+ */
+export function aiPrerequisiteErrors(): string[] {
+  const errors: string[] = [];
+  const positive = (name: string) => Number(process.env[name]) > 0;
+  if (!process.env.DATABASE_URL) errors.push("DATABASE_URL: rate limits and the monthly budget need a database to hold across instances.");
+  if (!process.env.OPENAI_API_KEY) errors.push("OPENAI_API_KEY is not set.");
+  if (!process.env.OPENAI_CHAT_MODEL) errors.push("OPENAI_CHAT_MODEL is not set.");
+  if (!positive("ATLAS_AI_MONTHLY_REQUEST_LIMIT")) errors.push("ATLAS_AI_MONTHLY_REQUEST_LIMIT must be a positive number.");
+  if (!positive("ATLAS_AI_MONTHLY_BUDGET_USD")) errors.push("ATLAS_AI_MONTHLY_BUDGET_USD must be a positive number.");
+  if (!positive("ATLAS_AI_PRICE_INPUT_PER_MTOK") || !positive("ATLAS_AI_PRICE_OUTPUT_PER_MTOK")) {
+    errors.push("ATLAS_AI_PRICE_INPUT_PER_MTOK and ATLAS_AI_PRICE_OUTPUT_PER_MTOK are needed to estimate spend.");
+  }
+  return errors;
+}
+
+/** True only when the switch is on and spend is bounded. */
+export function aiOperational() {
+  return aiIntegrationEnabled() && aiPrerequisiteErrors().length === 0;
+}
+
+/**
  * Whether uploaded documents have somewhere durable to live.
  *
  * Mirrors the check in lib/storage so a surface can say storage is missing
@@ -90,6 +121,20 @@ export function maxUploadBytes() {
   const configured = Number(process.env.ATLAS_MAX_UPLOAD_BYTES);
   if (Number.isFinite(configured) && configured > 0) return Math.floor(configured);
   return 4 * 1024 * 1024;
+}
+
+/**
+ * Largest upload sent straight to object storage.
+ *
+ * Presigned uploads bypass the platform's request-body cap, so the limit is a
+ * policy choice rather than a platform one. A developer's machine has no
+ * bucket and proxies uploads through Atlas, so maxUploadBytes applies there.
+ */
+export function maxDirectUploadBytes() {
+  if (!(process.env.S3_BUCKET && process.env.S3_REGION)) return maxUploadBytes();
+  const configured = Number(process.env.ATLAS_MAX_DIRECT_UPLOAD_BYTES);
+  if (Number.isFinite(configured) && configured > 0) return Math.floor(configured);
+  return 100 * 1024 * 1024;
 }
 
 /**
@@ -152,6 +197,13 @@ export function configurationErrors(): string[] {
         "for public read-only access.",
     );
   }
+
+  if (process.env.DATABASE_URL) {
+    const reason = insecureSslReason(process.env.DATABASE_URL);
+    if (reason) errors.push(reason);
+  }
+
+  errors.push(...githubConfigurationErrors());
 
   if (process.env.ATLAS_DEMO_AUTH === "true") {
     errors.push("ATLAS_DEMO_AUTH=true is set outside local development. Remove it.");

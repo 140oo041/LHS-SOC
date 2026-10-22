@@ -3,8 +3,9 @@
 import Image from "next/image";
 import Link from "next/link";
 import { signOut } from "next-auth/react";
-import { usePathname } from "next/navigation";
-import { useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useRef, useState, useTransition } from "react";
+import { switchDemoAccount } from "@/app/(workspace)/account-actions";
 import type { Actor } from "@/lib/domain";
 import { Icon, type IconName } from "@/components/icons";
 
@@ -20,6 +21,7 @@ export function AppShell({
   actor,
   anonymous,
   canSignIn,
+  demoAccounts = null,
   children,
 }: {
   actor: Actor;
@@ -27,9 +29,14 @@ export function AppShell({
   anonymous: boolean;
   /** Whether an identity provider exists to sign in with. */
   canSignIn: boolean;
+  /** Local development: the demo people this browser can switch between. */
+  demoAccounts?: ReadonlyArray<{ email: string; name: string; role: string }> | null;
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
+  const accountMenu = useRef<HTMLDetailsElement>(null);
+  const [switching, startSwitch] = useTransition();
   const [mobileOpen, setMobileOpen] = useState(false);
   const current = navigation.find((item) => pathname.startsWith(item.href)) ?? navigation[0];
 
@@ -68,7 +75,7 @@ export function AppShell({
               </Link>
             )
           ) : (
-            <details className="account-menu">
+            <details className="account-menu" ref={accountMenu}>
               <summary aria-label={`Open account menu for ${actor.name}`}>
                 <span className="avatar">{actor.name.split(/\s+/).map((part) => part[0]).slice(0, 2).join("")}</span>
               </summary>
@@ -76,7 +83,31 @@ export function AppShell({
                 <strong>{actor.name}</strong>
                 <span>{actor.email}</span>
                 <small>{actor.role}</small>
-                <button type="button" onClick={() => void signOut({ redirectTo: "/signin" })}>Sign out</button>
+                {demoAccounts ? (
+                  <div className="demo-accounts" role="group" aria-label="Switch local account">
+                    <small>Local development · switch account</small>
+                    {demoAccounts.map((account) => (
+                      <button
+                        key={account.email}
+                        type="button"
+                        aria-pressed={account.email === actor.email}
+                        disabled={switching || account.email === actor.email}
+                        onClick={() =>
+                          startSwitch(async () => {
+                            await switchDemoAccount(account.email);
+                            accountMenu.current?.removeAttribute("open");
+                            router.refresh();
+                          })
+                        }
+                      >
+                        <span>{account.name}</span>
+                        <em>{account.role}</em>
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <button type="button" onClick={() => void signOut({ redirectTo: "/signin" })}>Sign out</button>
+                )}
               </div>
             </details>
           )}
@@ -98,10 +129,13 @@ export function AppShell({
             );
           })}
         </nav>
-        <Link href="/admin" className={pathname.startsWith("/admin") ? "active nav-admin" : "nav-admin"} onClick={() => setMobileOpen(false)}>
-          <Icon name="settings" />
-          <span>Admin</span>
-        </Link>
+        {/* Cosmetic only: the admin page and routes check the role themselves. */}
+        {actor.role === "admin" && (
+          <Link href="/admin" className={pathname.startsWith("/admin") ? "active nav-admin" : "nav-admin"} onClick={() => setMobileOpen(false)}>
+            <Icon name="settings" />
+            <span>Admin</span>
+          </Link>
+        )}
       </aside>
       {mobileOpen && <button className="nav-scrim" aria-label="Close navigation" onClick={() => setMobileOpen(false)} />}
       <main className="atlas-main">{children}</main>

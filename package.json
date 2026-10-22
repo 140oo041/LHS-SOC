@@ -11,8 +11,10 @@
     "dev": "next dev",
     "prebuild": "node scripts/sync-evidence.mjs",
     "build": "next build",
+    "vercel-build": "node scripts/migrate.mjs --if-production && npm run build",
     "start": "next start",
     "db:migrate": "node scripts/migrate.mjs",
+    "db:migrate:check": "node scripts/migrate.mjs --check",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
     "test:web": "vitest run",
@@ -31,6 +33,7 @@
     "react-dom": "^19.3.1",
     "react-markdown": "^10.1.0",
     "remark-gfm": "^4.0.1",
+    "yaml": "^2.9.1",
     "zod": "^4.1.12"
   },
   "devDependencies": {

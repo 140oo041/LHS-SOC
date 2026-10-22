@@ -53,9 +53,13 @@ export type ArchitectureGraph = {
 
 let cached: ArchitectureGraph | null = null;
 
+/** The graph of the model bundled with this deployment. */
 export function graph(): ArchitectureGraph {
-  if (cached) return cached;
-  const model = loadModel();
+  cached ??= buildGraph(loadModel());
+  return cached;
+}
+
+export function buildGraph(model: ArchitectureModel): ArchitectureGraph {
 
   const blockById = new Map(model.blocks.map((block) => [block.id, block]));
   const childIds = new Map<string, string[]>();
@@ -127,7 +131,7 @@ export function graph(): ArchitectureGraph {
     return chain;
   };
 
-  cached = {
+  return {
     model,
     blocks: model.blocks,
     blockById,
@@ -177,5 +181,4 @@ export function graph(): ArchitectureGraph {
       withoutRtl: model.blocks.filter((block) => block.rtl.length === 0).length,
     },
   };
-  return cached;
 }

@@ -47,6 +47,37 @@ export async function loadLocalKnowledge(): Promise<LocalKnowledgeSource[]> {
   );
 }
 
+/**
+ * The sources at one commit of the wiki: its pages and the architecture
+ * model read through the content store (so merges that have not been
+ * redeployed are included), plus the other files bundled with this deployment.
+ */
+export async function loadKnowledgeAt(commitSha: string): Promise<LocalKnowledgeSource[]> {
+  const { readBlob, readFiles, WIKI_ROOT } = await import("@/lib/content");
+  const root = process.cwd();
+  const { MODEL_PATH } = await import("@/lib/model/load");
+  const wiki = [
+    ...(await readFiles(commitSha, WIKI_ROOT)).filter((file) => file.path.endsWith(".md")),
+    ...(await readFiles(commitSha, "architecture")).filter((file) => file.path === MODEL_PATH),
+  ];
+  const pages = await Promise.all(
+    wiki.map(async (file) => {
+      const content = await readBlob(file.blobSha);
+      return {
+        relativePath: file.path,
+        absolutePath: path.join(/* turbopackIgnore: true */ root, file.path),
+        content,
+        title: titleFromContent(file.path, content),
+        contentSha256: createHash("sha256").update(content).digest("hex"),
+        metadata: { category: file.path === MODEL_PATH ? "architecture" : "wiki", relative_path: file.path },
+      } satisfies LocalKnowledgeSource;
+    }),
+  );
+  const read = new Set(wiki.map((file) => file.path));
+  const bundled = (await loadLocalKnowledge()).filter((source) => !source.relativePath.startsWith(`${WIKI_ROOT}/`) && !read.has(source.relativePath));
+  return [...pages, ...bundled];
+}
+
 function queryTerms(question: string) {
   const stop = new Set(["about", "after", "again", "also", "does", "from", "have", "into", "that", "their", "this", "what", "when", "where", "which", "with", "would"]);
   return [...new Set(question.toLowerCase().match(/[a-z0-9][a-z0-9-]{2,}/g) ?? [])].filter((term) => !stop.has(term));
@@ -91,7 +122,20 @@ export async function searchLocalKnowledge(
     .slice(0, 3);
 }
 
+/**
+ * The commit the wiki is at. A Vercel deployment has no .git directory, but
+ * names the commit it was built from; the GitHub store knows the live head,
+ * which is newer than the build once wiki changes merge without a redeploy.
+ */
 export async function currentGitRevision() {
+  const { githubConfigured } = await import("@/lib/content/github-app");
+  if (githubConfigured()) {
+    const { contentStore } = await import("@/lib/content");
+    const store = await contentStore();
+    const head = await store.resolveHead(store.defaultBranch);
+    if (head) return head;
+  }
+  if (process.env.VERCEL_GIT_COMMIT_SHA) return process.env.VERCEL_GIT_COMMIT_SHA;
   const head = path.join(process.cwd(), ".git", "HEAD");
   try {
     const value = (await readFile(head, "utf8")).trim();

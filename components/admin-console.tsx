@@ -2,10 +2,24 @@
 
 import { useState } from "react";
 import type { KnowledgeRevision, Role } from "@/lib/domain";
+import type { Member } from "@/lib/roles";
+import { MembersPanel } from "@/components/admin/members-panel";
 import { aiIntegrationEnabled } from "@/lib/features";
 import { Icon } from "@/components/icons";
 
-export function AdminConsole({ actorRole, initialRevision }: { actorRole: Role; initialRevision: KnowledgeRevision | null }) {
+export function AdminConsole({
+  actorRole,
+  actorEmail,
+  initialRevision,
+  initialMembers,
+  persistent,
+}: {
+  actorRole: Role;
+  actorEmail: string;
+  initialRevision: KnowledgeRevision | null;
+  initialMembers: Member[];
+  persistent: boolean;
+}) {
   const [revision, setRevision] = useState(initialRevision);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
@@ -14,9 +28,13 @@ export function AdminConsole({ actorRole, initialRevision }: { actorRole: Role; 
     setBusy(true); setMessage("");
     const response = await fetch("/api/admin/ingestion", { method: "POST" });
     const data = await response.json();
-    if (!response.ok) setMessage(data.error ?? "Ingestion failed.");
+    if (!response.ok) setMessage([data.error ?? "Ingestion failed.", ...(data.reasons ?? [])].join(" "));
     else {
-      setMessage(`Indexed ${data.sourceCount} sources from ${data.gitRevision.slice(0, 12)}.`);
+      setMessage(
+        data.status === "ready"
+          ? `Indexed ${data.gitRevision.slice(0, 12)}.`
+          : `Indexing ${data.gitRevision.slice(0, 12)} is still processing; it finishes in the background.`,
+      );
       const status = await fetch("/api/admin/ingestion");
       if (status.ok) setRevision((await status.json()).revision);
     }
@@ -27,6 +45,7 @@ export function AdminConsole({ actorRole, initialRevision }: { actorRole: Role; 
   return (
     <div className="admin-page">
       <header><h1>Workspace controls</h1><p>Operational controls are explicit and auditable. Atlas never treats generated content as canonical design input.</p></header>
+      <MembersPanel initialMembers={initialMembers} actorEmail={actorEmail} persistent={persistent} />
       {aiIntegrationEnabled() ? (
         <section className="admin-section">
           <div><h2>Knowledge revision</h2><p>Upload the current Git-backed sources to the configured retrieval index.</p></div>

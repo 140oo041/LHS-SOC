@@ -6,22 +6,21 @@ import type {
   ChatMessage,
   ChatThread,
   Citation,
-  DocumentAsset,
   KnowledgeRevision,
   KnowledgeSourceRecord,
   TaskPriority,
   TaskStatus,
   ThreadSummary,
 } from "@/lib/domain";
-import { WORKSPACE_SLUG } from "@/lib/domain";
+import { PUBLIC_VISITOR_EMAIL, WORKSPACE_SLUG } from "@/lib/domain";
 import { hasDatabase, query, transaction } from "@/lib/db";
 
 type MemoryStore = {
   threads: Map<string, ChatThread & { ownerEmail: string }>;
   tasks: AtlasTask[];
-  documents: DocumentAsset[];
   revisions: KnowledgeRevision[];
   sources: Map<string, KnowledgeSourceRecord[]>;
+  deletedRevisions: Set<string>;
 };
 
 declare global {
@@ -36,9 +35,9 @@ function memory(): MemoryStore {
     const createdAt = now();
     globalThis.__atlasMemory = {
       threads: new Map(),
-      documents: [],
       revisions: [],
       sources: new Map(),
+      deletedRevisions: new Set(),
       tasks: [
         {
           id: "task-dma-timeout",
@@ -80,12 +79,15 @@ function memory(): MemoryStore {
   return globalThis.__atlasMemory;
 }
 
-async function ensureActor(actor: Actor) {
+export async function ensureActor(actor: Actor) {
+  // The public visitor is not a person; giving it a users row would put it
+  // on the member list. Reads that join on users simply find nothing for it.
+  if (actor.email === PUBLIC_VISITOR_EMAIL) return;
   await query(
     `INSERT INTO users (email, name, avatar_url)
      VALUES ($1, $2, $3)
      ON CONFLICT (email) DO UPDATE SET name = EXCLUDED.name, avatar_url = EXCLUDED.avatar_url`,
-    [actor.email, actor.name, actor.image ?? null],
+    [actor.email.toLowerCase(), actor.name, actor.image ?? null],
   );
 }
 
@@ -318,60 +320,6 @@ export async function updateTaskStatus(taskId: string, status: TaskStatus): Prom
   return result.rowCount ? mapTask(result.rows[0]) : null;
 }
 
-function mapDocument(row: Record<string, unknown>): DocumentAsset {
-  return {
-    id: String(row.id),
-    title: String(row.title),
-    filename: String(row.filename),
-    mimeType: String(row.mime_type),
-    byteSize: Number(row.byte_size),
-    storageKey: String(row.storage_key),
-    revision: Number(row.revision),
-    ownerEmail: row.owner_email ? String(row.owner_email) : undefined,
-    blockIds: (row.block_ids ?? []) as string[],
-    taskIds: (row.task_ids ?? []) as string[],
-    createdAt: new Date(String(row.created_at)).toISOString(),
-  };
-}
-
-export async function listDocuments(): Promise<DocumentAsset[]> {
-  if (!hasDatabase()) return structuredClone(memory().documents);
-  const result = await query(
-    `SELECT d.*, u.email AS owner_email FROM document_assets d
-     JOIN workspaces w ON w.id = d.workspace_id LEFT JOIN users u ON u.id = d.owner_id
-     WHERE w.slug = $1 ORDER BY d.created_at DESC`,
-    [WORKSPACE_SLUG],
-  );
-  return result.rows.map(mapDocument);
-}
-
-export async function createDocument(
-  actor: Actor,
-  input: Omit<DocumentAsset, "id" | "revision" | "ownerEmail" | "createdAt" | "taskIds">,
-): Promise<DocumentAsset> {
-  const document: DocumentAsset = {
-    ...input,
-    id: randomUUID(),
-    revision: 1,
-    ownerEmail: actor.email,
-    taskIds: [],
-    createdAt: now(),
-  };
-  if (!hasDatabase()) {
-    memory().documents.unshift(document);
-    return document;
-  }
-  await ensureActor(actor);
-  const result = await query(
-    `INSERT INTO document_assets
-       (id, workspace_id, title, filename, mime_type, byte_size, storage_key, owner_id, block_ids)
-     SELECT $1, w.id, $2, $3, $4, $5, $6, u.id, $7 FROM workspaces w, users u
-     WHERE w.slug = $8 AND u.email = $9 RETURNING *`,
-    [document.id, document.title, document.filename, document.mimeType, document.byteSize, document.storageKey, document.blockIds, WORKSPACE_SLUG, actor.email],
-  );
-  return { ...mapDocument(result.rows[0]), ownerEmail: actor.email };
-}
-
 export async function beginKnowledgeRevision(gitRevision: string): Promise<KnowledgeRevision> {
   const revision: KnowledgeRevision = {
     id: randomUUID(),
@@ -397,6 +345,7 @@ function mapRevision(row: Record<string, unknown>): KnowledgeRevision {
     id: String(row.id),
     gitRevision: String(row.git_revision),
     vectorStoreId: row.vector_store_id ? String(row.vector_store_id) : undefined,
+    providerBatchId: row.provider_batch_id ? String(row.provider_batch_id) : undefined,
     status: row.status as KnowledgeRevision["status"],
     sourceCount: Number(row.source_count),
     errorMessage: row.error_message ? String(row.error_message) : undefined,
@@ -405,14 +354,24 @@ function mapRevision(row: Record<string, unknown>): KnowledgeRevision {
   };
 }
 
-export async function completeKnowledgeRevision(
-  revisionId: string,
-  vectorStoreId: string,
-  sources: KnowledgeSourceRecord[],
-): Promise<void> {
+/**
+ * Records the provider objects a revision created as soon as they exist, so
+ * a run that fails halfway can still have them cleaned up.
+ */
+export async function setKnowledgeRevisionProvider(revisionId: string, ids: { vectorStoreId?: string; batchId?: string }) {
   if (!hasDatabase()) {
     const revision = memory().revisions.find((item) => item.id === revisionId);
-    if (revision) Object.assign(revision, { status: "ready", vectorStoreId, sourceCount: sources.length, completedAt: now() });
+    if (revision) Object.assign(revision, { ...(ids.vectorStoreId ? { vectorStoreId: ids.vectorStoreId } : {}), ...(ids.batchId ? { providerBatchId: ids.batchId } : {}) });
+    return;
+  }
+  await query(
+    "UPDATE knowledge_revisions SET vector_store_id = COALESCE($2, vector_store_id), provider_batch_id = COALESCE($3, provider_batch_id) WHERE id = $1",
+    [revisionId, ids.vectorStoreId ?? null, ids.batchId ?? null],
+  );
+}
+
+export async function recordKnowledgeSources(revisionId: string, sources: KnowledgeSourceRecord[]) {
+  if (!hasDatabase()) {
     memory().sources.set(revisionId, sources);
     return;
   }
@@ -425,12 +384,56 @@ export async function completeKnowledgeRevision(
         [revisionId, source.relativePath, source.title, source.providerFileId ?? null, source.contentSha256, JSON.stringify(source.metadata)],
       );
     }
-    await client.query(
-      `UPDATE knowledge_revisions SET status = 'ready', vector_store_id = $2,
-       source_count = $3, completed_at = now() WHERE id = $1`,
-      [revisionId, vectorStoreId, sources.length],
-    );
   });
+}
+
+export async function listKnowledgeSources(revisionId: string): Promise<KnowledgeSourceRecord[]> {
+  if (!hasDatabase()) return memory().sources.get(revisionId) ?? [];
+  const result = await query("SELECT relative_path, title, provider_file_id, content_sha256, metadata FROM knowledge_sources WHERE revision_id = $1", [revisionId]);
+  return result.rows.map((row) => ({
+    relativePath: String(row.relative_path),
+    title: String(row.title),
+    providerFileId: row.provider_file_id ? String(row.provider_file_id) : undefined,
+    contentSha256: String(row.content_sha256),
+    metadata: (row.metadata ?? {}) as KnowledgeSourceRecord["metadata"],
+  }));
+}
+
+export async function completeKnowledgeRevision(revisionId: string, sourceCount: number): Promise<void> {
+  if (!hasDatabase()) {
+    const revision = memory().revisions.find((item) => item.id === revisionId);
+    if (revision) Object.assign(revision, { status: "ready", sourceCount, completedAt: now() });
+    return;
+  }
+  await query("UPDATE knowledge_revisions SET status = 'ready', source_count = $2, completed_at = now() WHERE id = $1", [revisionId, sourceCount]);
+}
+
+/** Revisions in a state, oldest first, excluding ones already cleaned up. */
+export async function listKnowledgeRevisions(statuses: KnowledgeRevision["status"][]): Promise<KnowledgeRevision[]> {
+  if (!hasDatabase()) {
+    const deleted = memory().deletedRevisions;
+    return memory()
+      .revisions.filter((item) => statuses.includes(item.status) && !deleted.has(item.id))
+      .sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+  }
+  const result = await query(
+    "SELECT * FROM knowledge_revisions WHERE status = ANY($1) AND deleted_at IS NULL ORDER BY created_at",
+    [statuses],
+  );
+  return result.rows.map(mapRevision);
+}
+
+/** A revision of this commit that is queued, running, or ready, if any. */
+export async function liveKnowledgeRevisionFor(gitRevision: string): Promise<KnowledgeRevision | null> {
+  return (await listKnowledgeRevisions(["queued", "running", "ready"])).find((item) => item.gitRevision === gitRevision) ?? null;
+}
+
+export async function markKnowledgeRevisionDeleted(revisionId: string) {
+  if (!hasDatabase()) {
+    memory().deletedRevisions.add(revisionId);
+    return;
+  }
+  await query("UPDATE knowledge_revisions SET deleted_at = now() WHERE id = $1", [revisionId]);
 }
 
 export async function failKnowledgeRevision(revisionId: string, message: string) {
@@ -447,8 +450,13 @@ export async function failKnowledgeRevision(revisionId: string, message: string)
 
 export async function latestKnowledgeRevision(): Promise<KnowledgeRevision | null> {
   if (!hasDatabase()) return memory().revisions[0] ?? null;
-  const result = await query("SELECT * FROM knowledge_revisions ORDER BY created_at DESC LIMIT 1");
+  const result = await query("SELECT * FROM knowledge_revisions WHERE deleted_at IS NULL ORDER BY created_at DESC LIMIT 1");
   return result.rowCount ? mapRevision(result.rows[0]) : null;
+}
+
+/** The index chat should use: the newest one that finished, not the newest started. */
+export async function latestReadyKnowledgeRevision(): Promise<KnowledgeRevision | null> {
+  return (await listKnowledgeRevisions(["ready"])).at(-1) ?? null;
 }
 
 export async function findKnowledgeSourceByProviderId(providerFileId: string): Promise<KnowledgeSourceRecord | null> {

@@ -1,10 +1,10 @@
 import { requireActor } from "@/lib/authz";
-import { aiIntegrationEnabled, publicErrorMessage, secretMatches } from "@/lib/config";
-import { ingestKnowledge } from "@/lib/ingestion";
+import { aiIntegrationEnabled, aiOperational, aiPrerequisiteErrors, publicErrorMessage, secretMatches } from "@/lib/config";
+import { runIngestion } from "@/lib/ingestion";
 import { latestKnowledgeRevision } from "@/lib/repository";
 
 export const runtime = "nodejs";
-export const maxDuration = 120;
+export const maxDuration = 60;
 
 export async function GET() {
   const access = await requireActor(["admin"]);
@@ -22,11 +22,13 @@ export async function POST(request: Request) {
     const access = await requireActor(["admin"]);
     if (!access.actor) return access.response;
   }
-  if (!aiIntegrationEnabled()) {
-    return Response.json({ error: "Atlas has no AI integration yet." }, { status: 503 });
+  if (!aiOperational()) {
+    const reasons = aiIntegrationEnabled() ? aiPrerequisiteErrors() : [];
+    return Response.json({ error: "Atlas has no AI integration yet.", reasons }, { status: 503 });
   }
   try {
-    return Response.json(await ingestKnowledge(), { status: 201 });
+    // Waits up to ~40 s; a revision still processing is finished by the cron.
+    return Response.json(await runIngestion(), { status: 202 });
   } catch (error) {
     console.error("Atlas knowledge ingestion failed", error);
     return Response.json({ error: publicErrorMessage(error, "Ingestion failed") }, { status: 502 });

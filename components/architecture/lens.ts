@@ -55,7 +55,9 @@ export function lensToParams(lens: Lens): URLSearchParams {
   return params;
 }
 
-export function lensHref(blockId: string, lens: Lens): string {
-  const query = lensToParams(lens).toString();
+export function lensHref(blockId: string, lens: Lens, versionQuery = ""): string {
+  const params = lensToParams(lens);
+  for (const [key, value] of new URLSearchParams(versionQuery)) params.set(key, value);
+  const query = params.toString();
   return `/architecture/${blockId}${query ? `?${query}` : ""}`;
 }

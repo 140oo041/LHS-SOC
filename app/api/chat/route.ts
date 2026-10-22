@@ -1,5 +1,6 @@
 import { z } from "zod";
-import { chatProvider, sse } from "@/lib/ai";
+import { chatIsPaid, chatProvider, sse } from "@/lib/ai";
+import { recordAiUsage, reserveAiRequest } from "@/lib/ai-budget";
 import { requireActor } from "@/lib/authz";
 import { aiIntegrationEnabled, publicErrorMessage } from "@/lib/config";
 import { appendMessage, createThread, getThread } from "@/lib/repository";
@@ -28,9 +29,12 @@ export async function POST(request: Request) {
   }
   const access = await requireActor();
   if (!access.actor) return access.response;
-  const limited = takeRateLimit(`chat:${access.actor.email}`, 20, 60_000);
+  const limited = await takeRateLimit(`chat:${access.actor.email}`, 20, 60_000);
   if (!limited.allowed) {
     return Response.json({ error: "Atlas is receiving too many questions. Try again in a minute." }, { status: 429 });
+  }
+  if (chatIsPaid() && !(await reserveAiRequest())) {
+    return Response.json({ error: "This month's AI budget is used up. Ask an administrator." }, { status: 429 });
   }
 
   const parsed = requestSchema.safeParse(await request.json().catch(() => null));
@@ -58,6 +62,8 @@ export async function POST(request: Request) {
           if (event.type === "delta") {
             answer += event.text;
             controller.enqueue(sse("delta", { text: event.text }));
+          } else if (event.type === "usage") {
+            await recordAiUsage("chat", access.actor!.email, event.usage).catch((error) => console.error("Could not record AI usage", error));
           } else if (event.type === "citations") {
             citations = event.citations;
             controller.enqueue(sse("citations", { citations }));

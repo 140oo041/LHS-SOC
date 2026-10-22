@@ -19,6 +19,12 @@ colors:
   blue: "#1764c0"
   focus: "#006dc7"
   danger: "#aa2b24"
+  canvas-bg: "#f3f5f6"
+  grid-dot: "#b9c4ca"
+  node-stroke: "#b4c0c7"
+  select: "#0d6fd8"
+  select-soft: "rgba(13, 111, 216, 0.12)"
+  guide: "#e5396b"
 typography:
   display:
     fontFamily: '"IBM Plex Sans", "Segoe UI", Helvetica, Arial, sans-serif'
@@ -136,13 +142,15 @@ The palette reads as blue-gray drafting paper marked with near-black ink. Teal i
 
 ### Primary
 
-- **Instrument Ink** (`ink`): rails, decisive actions, selected diagram blocks, and the strongest hierarchy rules.
+- **Instrument Ink** (`ink`): rails, decisive actions, and the strongest hierarchy rules.
 - **Evidence Teal** (`teal`, `teal-dark`): contextual links, grounded states, source-aware actions, and diagram accents.
 
 ### Tertiary
 
 - **Protocol and State Set** (`red`, `green`, `amber`, `purple`, `blue`): semantic protocol, priority, permission, and health states. Never use these as a decorative rainbow.
 - **Focus Blue** (`focus`): the sole keyboard-focus outline.
+- **Selection Blue** (`select`, `select-soft`): what is selected on the architecture canvas (ring, handles, marquee, outline row) and the active canvas tool. Nothing else.
+- **Guide Pink** (`guide`): smart-guide lines while moving or resizing blocks. Visible only during a drag.
 - **Danger Red** (`danger`): destructive actions and failure messages, distinct from ordinary protocol red.
 
 ### Neutral
@@ -197,6 +205,7 @@ Atlas is flat by default. Paper tones, one-pixel rules, and ink boundaries estab
 - **Overlay** (`box-shadow: 0 18px 42px rgba(16, 28, 38, 0.15)`): account menus and mobile drawers.
 - **Composer** (`box-shadow: 0 12px 28px rgba(16, 28, 38, 0.10)`): the active Copilot input desk.
 - **Ticket** (`box-shadow: 0 7px 18px rgba(16, 28, 38, 0.07)`): task objects that can move through workflow states.
+- **Float** (`--shadow-float`: `0 1px 2px rgba(16, 28, 38, 0.06), 0 8px 24px rgba(16, 28, 38, 0.10)`): the outline, inspector, toolbar, and chips that float over the architecture canvas.
 
 **The Flat-by-Default Rule.** If a rule or paper-tone change explains the hierarchy, do not add a shadow.
 
@@ -216,7 +225,9 @@ The top bar identifies workspace and location; the ink rail changes sections. Ac
 
 ### Architecture Field Log
 
-The architecture canvas is dominant. A right field log reports model readiness, selected block name and summary, evidence-linked actions, stable ID, source, authority, and the reminder that generated explanation is secondary. Selection updates this log without replacing the diagram. Legacy diagram protocol colors and animations remain scoped to the model; animation is limited to SVG strokes, fixed-height progress, and brief spatial transitions.
+The architecture canvas is dominant and full-bleed: a dot grid (`canvas-bg`, `grid-dot`) that pans and zooms like a design tool. The outline (left) and the field log (right) float over it as 12px-radius cards with the Float shadow, and collapse individually or together (⌘\). One floating toolbar sits bottom-centre of the visible canvas: Select, Hand, Add block, Up a level, zoom, Undo, shortcuts.
+
+Blocks are white cards with a 6px radius, a `node-stroke` hairline, and a header band washed with their maturity colour (stronger under the Readiness lens). Selection is a Selection Blue ring with eight square handles, never a filled block, so a selected composite still shows its modules. The field log reports model readiness, the selected block's name and summary, evidence-linked actions, stable ID, source, authority, and the reminder that generated explanation is secondary. Selection updates this log without replacing the diagram. Protocol colors stay scoped to ports and edges; animation is limited to camera moves, SVG strokes, and brief spatial transitions.
 
 ### Wiki Source Register
 

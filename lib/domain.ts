@@ -86,13 +86,26 @@ export type DocumentAsset = {
   blockIds: string[];
   taskIds: string[];
   createdAt: string;
+  updatedAt: string;
+  archivedAt?: string;
+};
+
+export type DocumentRevision = {
+  revision: number;
+  filename: string;
+  mimeType: string;
+  byteSize: number;
+  note: string;
+  uploaderEmail?: string;
+  createdAt: string;
 };
 
 export type KnowledgeRevision = {
   id: string;
   gitRevision: string;
   vectorStoreId?: string;
-  status: "running" | "ready" | "failed";
+  providerBatchId?: string;
+  status: "queued" | "running" | "ready" | "failed";
   sourceCount: number;
   errorMessage?: string;
   createdAt: string;

@@ -1,3 +1,4 @@
+import { cookies } from "next/headers";
 import { auth } from "@/auth";
 import {
   demoAuthEnabled,
@@ -6,6 +7,8 @@ import {
   signInAvailable,
 } from "@/lib/config";
 import { PUBLIC_VISITOR_EMAIL, type Actor, type Role } from "@/lib/domain";
+import { DEMO_ACCOUNT_COOKIE, DEMO_ACCOUNTS } from "@/lib/demo-accounts";
+import { lookupAccess, normalizeEmail } from "@/lib/roles";
 
 export async function currentActor(): Promise<Actor | null> {
   // A deployment whose sign-in is half-configured denies everyone rather than
@@ -17,21 +20,26 @@ export async function currentActor(): Promise<Actor | null> {
   if (signInAvailable()) {
     const session = await auth();
     if (session?.user?.email) {
+      // Re-checked on every request: a revoked person is signed out from
+      // their next request, whatever their session token says.
+      const access = await lookupAccess(session.user.email);
+      if (!access.admitted) return null;
       return {
-        email: session.user.email,
+        email: normalizeEmail(session.user.email),
         name: session.user.name ?? session.user.email.split("@")[0],
         image: session.user.image,
-        role: session.user.role,
+        role: access.role,
       };
     }
   }
 
   if (demoAuthEnabled()) {
-    return {
-      email: "architect@atlas.local",
-      name: "Avery Chen",
-      role: "admin",
-    };
+    // Which local demo person this browser is being; the account menu switches it.
+    const chosen = (await cookies()).get(DEMO_ACCOUNT_COOKIE)?.value;
+    const account = DEMO_ACCOUNTS.find((item) => item.email === chosen) ?? DEMO_ACCOUNTS[0];
+    const access = await lookupAccess(account.email);
+    if (!access.admitted) return null;
+    return { email: account.email, name: account.name, role: access.role };
   }
 
   // Public read access. `viewer` is what makes this safe: every mutating

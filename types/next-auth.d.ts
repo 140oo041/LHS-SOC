@@ -1,16 +1,4 @@
-import type { DefaultSession } from "next-auth";
-import type { Role } from "@/lib/domain";
-
-declare module "next-auth" {
-  interface Session {
-    user: DefaultSession["user"] & {
-      role: Role;
-    };
-  }
-}
-
-declare module "next-auth/jwt" {
-  interface JWT {
-    role?: Role;
-  }
-}
+// Roles are deliberately absent from the session and the JWT: lib/authz
+// resolves them per request through lib/roles, so a role change takes effect
+// immediately instead of when an 8-hour token expires.
+export {};

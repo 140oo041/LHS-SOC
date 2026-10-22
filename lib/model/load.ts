@@ -1,34 +1,47 @@
 import { readFileSync } from "node:fs";
 import path from "node:path";
 import { load as parseYaml } from "js-yaml";
-import { modelSchema, type ArchitectureModel } from "./schema";
+import type { ArchitectureModel } from "./schema";
+import { validateModel } from "./validate";
 
-const MODEL_PATH = path.join(process.cwd(), "architecture", "soc.yaml");
+/** Where the model lives in the repository. */
+export const MODEL_PATH = "architecture/soc.yaml";
 
-let cached: ArchitectureModel | null = null;
+export class ModelInvalidError extends Error {
+  constructor(readonly issues: string[]) {
+    super(
+      `${MODEL_PATH} failed validation (${issues.length} issue(s)):\n${issues
+        .slice(0, 20)
+        .map((issue) => `  ${issue}`)
+        .join("\n")}\nRun \`python3 scripts/validate_model.py\` for the canonical report.`,
+    );
+  }
+}
 
 /**
- * Parses and validates architecture/soc.yaml once per server process.
+ * Parses and validates the text of a model.
  *
  * Failure is loud on purpose: a model that does not satisfy the schema means
  * every downstream surface would render invented or missing data, which the
  * product principles forbid. scripts/validate_model.py gates this in CI; this
- * is the runtime backstop.
+ * is the runtime backstop, and the gate for edits made in Atlas.
  */
-export function loadModel(): ArchitectureModel {
-  if (cached) return cached;
-  const raw = parseYaml(readFileSync(MODEL_PATH, "utf8"));
-  const parsed = modelSchema.safeParse(raw);
-  if (!parsed.success) {
-    const issues = parsed.error.issues
-      .slice(0, 20)
-      .map((issue) => `  ${issue.path.join(".") || "<root>"}: ${issue.message}`)
-      .join("\n");
-    throw new Error(
-      `architecture/soc.yaml failed validation (${parsed.error.issues.length} issue(s)):\n${issues}\n` +
-        "Run `python3 scripts/validate_model.py` for the canonical report.",
-    );
+export function parseModel(text: string): ArchitectureModel {
+  let raw: unknown;
+  try {
+    raw = parseYaml(text);
+  } catch (error) {
+    throw new ModelInvalidError([error instanceof Error ? error.message.split("\n")[0] : "not valid YAML"]);
   }
-  cached = parsed.data;
+  const result = validateModel(raw);
+  if (!result.ok) throw new ModelInvalidError(result.issues);
+  return result.model;
+}
+
+let cached: ArchitectureModel | null = null;
+
+/** The model bundled with this deployment, parsed once per server process. */
+export function loadModel(): ArchitectureModel {
+  cached ??= parseModel(readFileSync(path.join(process.cwd(), MODEL_PATH), "utf8"));
   return cached;
 }

@@ -30,7 +30,14 @@ export type IconName =
   | "level-up"
   | "route"
   | "port"
-  | "sealed";
+  | "sealed"
+  | "pointer"
+  | "hand"
+  | "sidebar"
+  | "undo"
+  | "help"
+  | "minus"
+  | "block";
 
 const paths: Record<IconName, React.ReactNode> = {
   architecture: <><rect x="3" y="4" width="7" height="6" rx="1"/><rect x="14" y="4" width="7" height="6" rx="1"/><rect x="8.5" y="15" width="7" height="5" rx="1"/><path d="M6.5 10v2.5h11V10M12 12.5V15"/></>,
@@ -63,6 +70,13 @@ const paths: Record<IconName, React.ReactNode> = {
   route: <><circle cx="5" cy="6" r="2"/><circle cx="19" cy="18" r="2"/><path d="M5 8v4a4 4 0 0 0 4 4h8"/></>,
   port: <><rect x="4" y="9" width="16" height="6" rx="1"/><path d="M8 9V6M16 15v3"/></>,
   sealed: <><rect x="4" y="4" width="16" height="16" rx="2"/><path d="M4 4l16 16M20 4 4 20"/></>,
+  pointer: <path d="M5 3.5 18.5 11l-6 1.6-2.6 5.9L5 3.5Z"/>,
+  hand: <><path d="M8 12.5V5.8a1.6 1.6 0 0 1 3.2 0V11"/><path d="M11.2 10.5V4.6a1.6 1.6 0 0 1 3.2 0v6"/><path d="M14.4 10.8V6.2a1.6 1.6 0 0 1 3.2 0v7.3c0 4.2-2.6 7-6.4 7-2.6 0-4.1-1.1-5.5-3.2l-2.2-3.4a1.6 1.6 0 0 1 2.6-1.8L8 14"/></>,
+  sidebar: <><rect x="3" y="4" width="18" height="16" rx="2.5"/><path d="M9 4v16"/></>,
+  undo: <><path d="M9 14 4 9l5-5"/><path d="M4 9h10.5a5.5 5.5 0 0 1 0 11H11"/></>,
+  help: <><circle cx="12" cy="12" r="9"/><path d="M9.6 9.3a2.5 2.5 0 0 1 4.8 1c0 1.7-2.4 2.2-2.4 3.7M12 17.2v.1"/></>,
+  minus: <path d="M5 12h14"/>,
+  block: <><rect x="4" y="5" width="16" height="14" rx="2.5"/><path d="M4 9.5h16"/></>,
 };
 
 export function Icon({ name, ...props }: { name: IconName } & SVGProps<SVGSVGElement>) {
